@@ -4,15 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shootaround</title>
-<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans: Journeyman, Knecht 4, Stat Line and Higher or Lower.">
+<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans: Journeyman, Links, Stat Line and Higher or Lower.">
 <meta property="og:title" content="Shootaround: daily sports puzzles">
-<meta property="og:description" content="Journeyman, Knecht 4 and Stat Line. New NBA, NFL, NHL and MLB puzzles every day.">
+<meta property="og:description" content="Journeyman, Links and Stat Line. New NBA, NFL, NHL and MLB puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://derek1267.github.io/Shootaround/">
 <meta property="og:image" content="https://derek1267.github.io/Shootaround/og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#6d3fd6">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%236d3fd6%22/%3E%20%20%3Cpath%20d%3D%22M19%2041%20Q%2023%206%2046%2021%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%20stroke-dasharray%3D%220.1%206.2%22/%3E%20%20%3Cpath%20d%3D%22M38%2023%20h17%22%20stroke%3D%22%23fff%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22/%3E%20%20%3Cpath%20d%3D%22M40.5%2024.5%20l2.6%209.5%20h6.8%20l2.6%20-9.5%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222.2%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%20opacity%3D%22.85%22/%3E%20%20%3Ccircle%20cx%3D%2217%22%20cy%3D%2245%22%20r%3D%228.5%22%20fill%3D%22%23f59e57%22/%3E%20%20%3Cpath%20d%3D%22M8.6%2044%20h16.8%20M17%2036.5%20v17%20M11%2039%20q5%206%200%2012.5%20M23%2039%20q-5%206%200%2012.5%22%20fill%3D%22none%22%20stroke%3D%22%233a1d0c%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -61,7 +63,10 @@ a { color: inherit; }
 header { display: flex; flex-direction: column; gap: 12px; }
 .brand { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .wordmark { font-family: var(--display); font-weight: 800; font-size: clamp(42px, 11vw, 60px); line-height: .85; text-transform: uppercase; margin: 0; text-decoration: none; }
-.wordmark span { color: var(--accent); }
+.wordmark { display: inline-flex; align-items: center; gap: .22em; }
+.wordmark b { font-weight: inherit; }
+.wordmark b span { color: var(--accent); }
+.wordmark .logo { width: .9em; height: .9em; flex: none; border-radius: .22em; }
 .meta { font-size: 14px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .meta strong { color: var(--ink); font-weight: 600; }
 .ico { width: 18px; height: 18px; flex: none; display: inline-block; vertical-align: -3px; }
@@ -74,7 +79,8 @@ header { display: flex; flex-direction: column; gap: 12px; }
 nav { display: flex; gap: 6px; }
 nav a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font: 600 13px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; padding: 10px 8px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); }
 nav a[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--accent); }
-nav a .done-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+nav a { position: relative; }
+nav a .done-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
 @media (max-width: 560px) {
   body { padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
   nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; gap: 0; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(20,8,40,.08); }
@@ -291,7 +297,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .boxline2 b { display: block; font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
 .boxline-cap { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
-/* Knecht 4 */
+/* Links */
 .solved { display: flex; flex-direction: column; gap: 8px; }
 .solved:not(:empty) { margin-bottom: 8px; }
 .group { border-radius: 10px; padding: 10px 12px; text-align: center; color: #170f24; min-height: 72px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
@@ -340,6 +346,9 @@ canvas.confetti { position: fixed; inset: 0; z-index: 30; pointer-events: none; 
 .stat-table th, .stat-table td { padding: 7px 4px; border-bottom: 1px solid var(--line); text-align: right; }
 .stat-table th:first-child, .stat-table td:first-child { text-align: left; }
 .stat-table th { font: 700 11px/1.2 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stat-tabs { margin: 6px 0 14px; }
+button.sport { background: transparent; cursor: pointer; font-family: var(--display); }
+.stat-table td .ico { width: 16px; height: 16px; }
 .stat-table tr.sport-row td { font: 800 17px/1 var(--display); text-transform: uppercase; color: var(--accent); padding-top: 14px; border-bottom: 0; }
 .kbd { font: 600 12px/1 ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 2px 5px; }
 .how h3 { font: 700 12px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); margin: 0 0 8px; }
@@ -403,7 +412,7 @@ canvas.confetti { position: fixed; inset: 0; z-index: 30; pointer-events: none; 
 <div class="wrap">
   <header>
     <div class="topbar">
-      <a class="wordmark" href="#" id="home-link">Shoot<span>around</span></a>
+      <a class="wordmark" href="#" id="home-link" aria-label="Shootaround home"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true">  <rect width="64" height="64" rx="16" fill="#6d3fd6"/>  <path d="M19 41 Q 23 6 46 21" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="0.1 6.2"/>  <path d="M38 23 h17" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/>  <path d="M40.5 24.5 l2.6 9.5 h6.8 l2.6 -9.5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>  <circle cx="17" cy="45" r="8.5" fill="#f59e57"/>  <path d="M8.6 44 h16.8 M17 36.5 v17 M11 39 q5 6 0 12.5 M23 39 q-5 6 0 12.5" fill="none" stroke="#3a1d0c" stroke-width="1.5" stroke-linecap="round"/></svg><b>Shoot<span>around</span></b></a>
       <div class="tools">
         <button class="iconbtn" type="button" id="btn-stats" aria-label="Your stats" title="Your stats"></button>
         <button class="iconbtn" type="button" id="btn-settings" aria-label="Settings" title="Settings"></button>
@@ -626,7 +635,7 @@ const ICON = {
   nhl: SVG('<ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9v5c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/>'),
   mlb: SVG('<circle cx="12" cy="12" r="9"/><path d="M7 4.5c2 2.5 2 12.5 0 15M17 4.5c-2 2.5-2 12.5 0 15"/>'),
 };
-const GAME_ICON = { journeyman: "route", "knecht-4": "grid", "stat-line": "bars", "higher-lower": "updown" };
+const GAME_ICON = { journeyman: "route", "links": "grid", "stat-line": "bars", "higher-lower": "updown" };
 
 /* Old names -> today's franchise. Keys are "Nickname" or "Nickname|City" when the nickname alone is ambiguous. */
 const RENAMES = {
@@ -899,7 +908,7 @@ const k4 = {
     const st = this.st;
     if (st.done && st.mode === "daily") recordStats("knecht", st.won);
     this.save(); this.busy = false; render(); this.landed = -1;
-    if (st.done) setTimeout(() => openModal("knecht-4", this, true), reduced() ? 0 : 500);
+    if (st.done) setTimeout(() => openModal("links", this, true), reduced() ? 0 : 500);
   },
   hint() {
     const st = this.st; if (st.hints >= K4_HINTS || st.done) return;
@@ -933,7 +942,7 @@ const k4 = {
   },
   share() {
     const st = this.st;
-    const head = st.mode === "practice" ? `Shootaround ${LG()} · Knecht 4 (practice)` : `Shootaround ${LG()} · Knecht 4 #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LG()} · Links (practice)` : `Shootaround ${LG()} · Links #${st.idx + 1}`;
     return `${head}${st.hints ? `  💡${st.hints}` : ""}\n${st.history.map(r => r.map(t => TIER_EMOJI[t]).join("")).join("\n")}`;
   },
   result() {
@@ -955,7 +964,7 @@ const k4 = {
     const pips = Array.from({ length: K4_MISTAKES }, (_, i) => `<span class="pip ${i < st.mistakes ? "used" : ""}"></span>`).join("");
     root.innerHTML = `<div class="layout k4"><div class="main">
       <section class="card" id="k-card">
-        <div class="title-row"><h2 class="game-title" style="color:var(--g-k4)">Knecht 4</h2>${badge(puz.lvl, st.mode === "practice")}</div>
+        <div class="title-row"><h2 class="game-title" style="color:var(--g-k4)">Links</h2>${badge(puz.lvl, st.mode === "practice")}</div>
         <p class="prompt">Find <b>four groups of four</b> players who share something.</p>
         <div class="solved">${solved}</div>
         ${st.done ? "" : `<div class="grid">${tiles}</div>
@@ -996,7 +1005,7 @@ const k4 = {
       $("k-hint2").addEventListener("click", () => this.hint());
       $("k-submit").addEventListener("click", () => this.submit());
     }
-    wireResult(root, "knecht-4", this);
+    wireResult(root, "links", this);
   }
 };
 function shuffle(arr, seed) {
@@ -1255,11 +1264,11 @@ document.addEventListener("keydown", e => {
    ===================================================================== */
 const GAMES = {
   journeyman: { title: "Journeyman", blurb: "Name the player from the teams they played for.", color: "var(--g-jm)", obj: jm },
-  "knecht-4": { title: "Knecht 4", blurb: "Sort 16 players into 4 hidden groups.", color: "var(--g-k4)", obj: k4 },
+  "links": { title: "Links", blurb: "Find the four hidden links between 16 players.", color: "var(--g-k4)", obj: k4 },
   "stat-line": { title: "Stat Line", blurb: "Name the player from their career numbers.", color: "var(--g-sl)", obj: sl },
   "higher-lower": { title: "Higher or Lower", short: "Hi-Lo", blurb: "Five quick calls on career and season stats.", color: "var(--g-hl)", obj: hl }
 };
-const GAME_ORDER = ["journeyman", "knecht-4", "stat-line", "higher-lower"];
+const GAME_ORDER = ["journeyman", "links", "stat-line", "higher-lower"];
 let NAMES = [];
 
 function gameStatus(g) {
@@ -1268,11 +1277,11 @@ function gameStatus(g) {
   if (!s.done) return { kind: "live", text: "In progress" };
   if (!s.won) return { kind: "lost", text: "Missed" };
   if (g === "higher-lower") return { kind: s.won ? "won" : "lost", text: `${s.score}/5 right` };
-  if (g === "knecht-4") return { kind: "won", text: s.mistakes ? `Solved · ${s.mistakes} miss${s.mistakes === 1 ? "" : "es"}` : "Perfect" };
+  if (g === "links") return { kind: "won", text: s.mistakes ? `Solved · ${s.mistakes} miss${s.mistakes === 1 ? "" : "es"}` : "Perfect" };
   return { kind: "won", text: `Solved in ${s.guesses.length}` };
 }
 function todayLevel(g) {
-  const list = g === "journeyman" ? D.journeyman : g === "knecht-4" ? D.knecht : D.statline;
+  const list = g === "journeyman" ? D.journeyman : g === "links" ? D.knecht : D.statline;
   return list[dailyIndex(list.length)].lvl;
 }
 function sportTabs() {
@@ -1308,7 +1317,7 @@ function openSheet(title, html) {
   lastFocus = document.activeElement;
   $("modal-root").innerHTML = `<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
     <button class="x" type="button" aria-label="Close" id="m-close">${ICON.x}</button>
-    <div class="kicker">${esc(title)}</div>${html}</div></div>`;
+    ${html}</div></div>`;
   $("m-close").addEventListener("click", closeModal);
   $("scrim").addEventListener("click", e => { if (e.target.id === "scrim") closeModal(); });
   $("modal-root").querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", closeModal));
@@ -1321,7 +1330,7 @@ const HELP = {
     <li>Start typing a name and pick from the list. Each miss unlocks a clue at the bottom of the card.</li>
     <li><span class="legend" style="background:var(--near)"></span>Your guess shared a team with the answer. <span class="legend" style="background:var(--miss);margin-left:8px"></span>No shared teams.</li>
     <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
-  "knecht-4": () => `<h2>${ICON.grid} Knecht 4</h2><div class="how"><ul>
+  "links": () => `<h2>${ICON.grid} Links</h2><div class="how"><ul>
     <li>Find four groups of four players who share something. Tap four, then Submit.</li>
     <li>You can make ${K4_MISTAKES} mistakes. "One away" means three of your four belong together.</li>
     <li>${ICON.bulb} Hints: the first shows what kind of link each group has; the next two name the easiest groups. Hints show in your shared result.</li>
@@ -1341,23 +1350,28 @@ const HELP = {
 function openHelp() {
   const g = GAMES[current];
   const body = g ? HELP[current]() : `<h2>How it works</h2><div class="how"><ul>
-      <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Knecht 4, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
+      <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Links, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
       <li>Finished today's? Try a practice round from any game. Practice doesn't touch your stats.</li>
       <li>New puzzles arrive at midnight, your time.</li></ul></div>`;
   openSheet("How to play", body + `<div class="row-actions" style="margin-top:14px"><button class="primary" type="button" data-close>${ICON.play}Let's play</button></div>`);
 }
-function openStats() {
-  const rows = Object.entries(SPORTS).map(([k, sp]) => `<tr class="sport-row"><td colspan="5">${sp.label}</td></tr>` + GAME_ORDER.map(g => {
-    const s = getStatsFor(k, GAMES[g].obj.store), pct = s.played ? Math.round(s.wins / s.played * 100) + "%" : "—";
-    return `<tr><td>${GAMES[g].title}</td><td>${s.played}</td><td>${pct}</td><td>${s.streak}</td><td>${s.best}</td></tr>`;
-  }).join("")).join("");
+function openStats(sel) {
+  sel = SPORTS[sel] ? sel : SPORT;
+  const tabs = Object.entries(SPORTS).map(([k, sp]) =>
+    `<button type="button" class="sport ${k === sel ? "on" : ""}" data-sp="${k}" aria-pressed="${k === sel}">${ICON[k]}${sp.label}</button>`).join("");
+  const rows = GAME_ORDER.map(g => {
+    const s = getStatsFor(sel, GAMES[g].obj.store), pct = s.played ? Math.round(s.wins / s.played * 100) + "%" : "—";
+    return `<tr><td><span style="color:${GAMES[g].color}">${ICON[GAME_ICON[g]]}</span> ${GAMES[g].title}</td><td>${s.played}</td><td>${pct}</td><td>${s.streak}</td><td>${s.best}</td></tr>`;
+  }).join("");
   openSheet("Your stats", `<h2>${ICON.stats} Your stats</h2>
+    <div class="sports stat-tabs" role="group" aria-label="Sport">${tabs}</div>
     <table class="stat-table"><thead><tr><th>Game</th><th>Played</th><th>Win</th><th>Streak</th><th>Best</th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="foot-note" style="margin-top:12px">Stats are saved in this browser only.</p>`);
+    <p class="foot-note" style="margin-top:12px">A win means solving the puzzle (3 or more right in Higher or Lower). Stats are saved in this browser only.</p>`);
+  $("modal-root").querySelectorAll("[data-sp]").forEach(btn => btn.addEventListener("click", () => { openStats(btn.dataset.sp); const f = $("modal-root").querySelector(`[data-sp="${btn.dataset.sp}"]`); if (f) f.focus(); }));
 }
 document.addEventListener("keydown", e => {
-  if ($("modal-root").innerHTML || current !== "knecht-4" || !k4.st || k4.st.done) return;
+  if ($("modal-root").innerHTML || current !== "links" || !k4.st || k4.st.done) return;
   if (e.target.closest && e.target.closest("input, textarea")) return;
   if (e.key === "Enter" && k4.st.selected.length === 4 && !e.target.closest("button")) { e.preventDefault(); k4.submit(); }
   if (e.key === "Escape" && k4.st.selected.length && !k4.busy) { k4.st.selected = []; render(); }
@@ -1372,7 +1386,7 @@ function reportURL(st) {
   const g = GAMES[current], ans = st.puzzle ? st.puzzle.n : st.ans ? st.ans.n : null;
   const day_ = st.mode === "practice" ? "practice" : `day ${st.idx + 1}`;
   const title = `${LG()} ${g ? g.title : ""} ${day_}: `;
-  const extra = g && current === "knecht-4" ? k4.groups().map(x => `- ${x.label}: ${x.p.join(", ")}`).join("\n")
+  const extra = g && current === "links" ? k4.groups().map(x => `- ${x.label}: ${x.p.join(", ")}`).join("\n")
     : current === "higher-lower" ? st.qs.map((q, i) => `${i + 1}. ${q.s}: ${q.a.n} (${q.a.c}) ${FMT[q.f](q.a.v)} vs ${q.b.n} (${q.b.c}) ${FMT[q.f](q.b.v)}`).join("\n")
     : `Answer: ${ans}`;
   const body = `**Sport:** ${LG()}\n**Game:** ${g ? g.title : ""}\n**Puzzle:** ${day_}\n\n${extra}\n\n**What's wrong?**\n`;
@@ -1401,7 +1415,7 @@ function openArchive(gameId, obj) {
 function openSettings() {
   const cb = document.documentElement.classList.contains("cb");
   openSheet("Settings", `<h2>${ICON.gear} Settings</h2>
-    <label class="toggle"><div><b>Colour-blind friendly colours</b><span>Uses a high-contrast palette and adds shapes (● ▲ ■ ◆) to Knecht 4 groups.</span></div>
+    <label class="toggle"><div><b>Colour-blind friendly colours</b><span>Uses a high-contrast palette and adds shapes (● ▲ ■ ◆) to Links groups.</span></div>
       <span class="switch"><input type="checkbox" id="opt-cb" ${cb ? "checked" : ""}><i></i></span></label>
     <p class="panel-note" style="margin-top:12px">Settings are saved in this browser.</p>`);
   $("opt-cb").addEventListener("change", e => {
@@ -1435,7 +1449,7 @@ async function useSport(k) {
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
   store.set("sa2:sport", k);
-  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${D.journeyman.length} Journeyman, ${D.knecht.length} Knecht 4, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
+  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
 }
 function render() {
   const root = $("view");
@@ -1452,10 +1466,11 @@ function render() {
 async function route() {
   let h = location.hash.slice(1);
   let sport = store.get("sa2:sport", "nba"), game = "home";
+  if (h === "knecht-4") h = "links";
   if (GAMES[h]) game = h;                                  // old links like #journeyman
   else {
     const m = h.match(/^(nba|nfl|nhl|mlb)(?:-(.+))?$/);
-    if (m) { sport = m[1]; game = GAMES[m[2]] ? m[2] : "home"; }
+    if (m) { sport = m[1]; const g2 = m[2] === "knecht-4" ? "links" : m[2]; game = GAMES[g2] ? g2 : "home"; }
   }
   if (!SPORTS[sport]) sport = "nba";
   const token = ++loadToken;

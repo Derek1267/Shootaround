@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/screenshots/home.png" alt="The Shootaround home page with four daily games" width="760"></p>
+<p align="center"><img src="docs/shootaround.png" alt="Shootaround: four quick daily sports puzzles for NBA, NFL, NHL and MLB" width="760"></p>
 
 # Shootaround
 
@@ -13,7 +13,7 @@ Works on phones, tablets and computers. No account, no ads, no downloads.
 | Game | How it works |
 |---|---|
 | 🧭 **Journeyman** | See every team a player suited up for, in order. Name the player in 6 guesses. Each miss unlocks a clue (seasons, position, draft, college or birthplace, initials). Teams show their current name, with the old one noted ("Thunder · Seattle (SuperSonics)"). |
-| 🟪 **Knecht 4** | Sort 16 players into 4 hidden groups of 4: teams, colleges, draft picks, awards, milestones, birthplaces, even first names. 4 mistakes allowed, 3 hints. Some players fit more than one group, but only one way uses all sixteen. |
+| 🟪 **Links** | Sort 16 players into 4 hidden groups of 4: teams, colleges, draft picks, awards, milestones, birthplaces, even first names. 4 mistakes allowed, 3 hints. Some players fit more than one group, but only one way uses all sixteen. |
 | 📊 **Stat Line** | Name the player from their career numbers. Each guess shows that player's stats with ↑/↓ arrows pointing toward the answer. |
 | ↕️ **Higher or Lower** | Five quick calls: is the second player's number higher or lower? Questions get harder as you go, and the last one is about a single season. |
 
@@ -21,11 +21,13 @@ Each sport has its own set of all four games and its own streaks. Switch sports 
 
 ## Screenshots
 
-| Knecht 4 | Higher or Lower |
+| Home | Links |
 |---|---|
-| <img src="docs/screenshots/knecht-4.png" alt="Knecht 4: a grid of 16 NFL players to sort into groups" width="420"> | <img src="docs/screenshots/higher-or-lower.png" alt="Higher or Lower: career hits, Justin Upton versus Lance Berkman" width="420"> |
-| **Journeyman** | **On your phone** |
-| <img src="docs/screenshots/journeyman.png" alt="Journeyman: an NHL player's route through six teams" width="420"> | <img src="docs/screenshots/phone.png" alt="The home page on a phone, with the tab bar at the bottom" width="200"> |
+| <img src="docs/screenshots/home.png" alt="The home page: four game cards in a 2 by 2 grid" width="420"> | <img src="docs/screenshots/links.png" alt="Links: a grid of 16 NFL players to sort into groups" width="420"> |
+| **Higher or Lower** | **Journeyman** |
+| <img src="docs/screenshots/higher-or-lower.png" alt="Higher or Lower: career hits, Justin Upton versus Lance Berkman" width="420"> | <img src="docs/screenshots/journeyman.png" alt="Journeyman: an NHL player's route through six teams" width="420"> |
+
+<p align="center"><img src="docs/screenshots/phone.png" alt="The home page on a phone, with the tab bar at the bottom" width="260"><br><em>On your phone</em></p>
 
 ## How to play in 30 seconds
 
@@ -40,8 +42,8 @@ Each sport has its own set of all four games and its own streaks. Switch sports 
 - **Practice rounds** whenever you want more, which don't affect your stats
 - **Archive** of every past day
 - **Hints, clues and a Skip button** when you're stuck
-- **Colour-blind friendly mode** (⚙ Settings) with shapes on Knecht 4 groups
-- **Keyboard shortcuts:** Enter and Esc in Knecht 4; ↑/↓ (or H/L) and Enter in Higher or Lower
+- **Colour-blind friendly mode** (⚙ Settings) with shapes on Links groups
+- **Keyboard shortcuts:** Enter and Esc in Links; ↑/↓ (or H/L) and Enter in Higher or Lower
 - **Works on phones and big screens:** a bottom tab bar on mobile, two columns on desktop
 
 ## FAQ
@@ -86,9 +88,11 @@ python3 -m http.server 8000
 | File | What it is |
 |---|---|
 | `index.html` | The whole site: layout, styles and game logic |
-| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json` | 365 days of Journeyman, Knecht 4 and Stat Line per sport, plus the player lists for guessing |
+| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json` | 365 days of Journeyman, Links and Stat Line per sport, plus the player lists for guessing |
 | `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json` | 365 days of Higher or Lower per sport (5 questions a day) |
 | `og.png` | Preview image for shared links |
+| `icon-180.png` | Home-screen icon when someone adds the site to their phone |
+| `docs/` | README images: the summary graphic and screenshots |
 | `build/` | Scripts that generate and check the puzzle files |
 
 ### The puzzle schedule is fixed
@@ -101,14 +105,14 @@ Day 1 is **22 November 2026**. Each day's puzzles are stored in the JSON files, 
 pip install -r build/requirements.txt
 cd build
 bash get_data.sh                     # downloads raw data into ../raw-data (~300 MB)
-python3 build.py --force             # NBA: Journeyman, Knecht 4, Stat Line (~10 min)
+python3 build.py --force             # NBA: Journeyman, Links, Stat Line (~10 min)
 python3 build_sport.py nfl nhl mlb --force
 python3 hl_build.py nba nfl nhl mlb --force   # Higher or Lower
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 ```
 
 The checkers make sure that:
-- every Knecht 4 player really fits their group, and each grid has exactly one solution;
+- every Links player really fits their group, and each grid has exactly one solution;
 - no group repeats;
 - Journeyman routes match the data;
 - Higher or Lower values match the career and season numbers, with no ties.
@@ -118,7 +122,7 @@ The checkers make sure that:
 Every puzzle is generated from real data rather than written by hand:
 - Players are ranked by a fame score (All-Star or Pro Bowl picks, awards, career totals, Hall of Fame), weighted toward recent careers.
 - Early-week puzzles use the best-known players, and later days dig deeper.
-- Knecht 4 grids are built from categories like teams, colleges, draft picks, awards, milestones, birthplaces, heights and names. A solver then checks that only one grouping works, and rejects grids where an unintended fifth group sneaks in.
+- Links grids are built from categories like teams, colleges, draft picks, awards, milestones, birthplaces, heights and names. A solver then checks that only one grouping works, and rejects grids where an unintended fifth group sneaks in.
 
 ## Data sources and credits
 
