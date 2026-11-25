@@ -6,7 +6,7 @@
 <title>Shootaround</title>
 <meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans: Journeyman, Links, Stat Line and Higher or Lower.">
 <meta property="og:title" content="Shootaround: daily sports puzzles">
-<meta property="og:description" content="Journeyman, Links and Stat Line. New NBA, NFL, NHL and MLB puzzles every day.">
+<meta property="og:description" content="Journeyman, Links, Stat Line and Higher or Lower. New NBA, NFL, NHL and MLB puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://derek1267.github.io/Shootaround/">
 <meta property="og:image" content="https://derek1267.github.io/Shootaround/og.png">
@@ -31,7 +31,7 @@
   --g-jm: #7b3fe4;
   --g-k4: #a8338f;
   --g-sl: #4a45c4;
-  --g-hl: #c2410c;
+  --g-hl: #9a2fd0;
   --good: #23905a;
   --near: #c98f10;
   --miss: #c4bcd3;
@@ -43,14 +43,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #120c1f; --surface: #1d1530; --ink: #efeaf8; --muted: #a297b8; --line: #33284b;
-    --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #f59e57;
+    --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
     --good: #3bb877; --near: #e0ad35; --miss: #3d3156;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #120c1f; --surface: #1d1530; --ink: #efeaf8; --muted: #a297b8; --line: #33284b;
-  --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #f59e57;
+  --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
   --good: #3bb877; --near: #e0ad35; --miss: #3d3156;
   color-scheme: dark;
 }
@@ -1436,18 +1436,36 @@ function openCredits() {
 }
 let current = "home";
 let loadToken = 0;
-async function useSport(k) {
-  if (CACHE[k]) { D = CACHE[k]; }
-  else {
+const LOADING = {};
+function loadSport(k) {                                   // main + Higher or Lower files fetched together, shared by clicks and prefetch
+  if (CACHE[k]) return Promise.resolve(CACHE[k]);
+  if (!LOADING[k]) {
+    LOADING[k] = Promise.all([
+      fetch(SPORTS[k].file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(`hl-${k}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(([d, h]) => {
+      d._players = new Map(); d.players.forEach(p => { if (!d._players.has(p.n)) d._players.set(p.n, p); });
+      d.hl = h ? h.days : [];
+      return CACHE[k] = d;
+    }).finally(() => { delete LOADING[k]; });
+  }
+  return LOADING[k];
+}
+function prefetchSports() {                               // after the first page is up, quietly load the other sports
+  const rest = Object.keys(SPORTS).filter(k => !CACHE[k]);
+  const next = () => { const k = rest.shift(); if (k) loadSport(k).catch(() => {}).then(() => setTimeout(next, 50)); };
+  (window.requestIdleCallback || (f => setTimeout(f, 800)))(next);
+}
+async function useSport(k, token) {
+  let d = CACHE[k];
+  if (!d) {
     const v = $("view");
     if (D) v.classList.add("busy");                       // switching sports: keep the page where it is
     else v.innerHTML = `<p class="loading">Loading ${SPORTS[k].label} puzzles…</p>`;
-    const res = await fetch(SPORTS[k].file).finally(() => v.classList.remove("busy"));
-    if (!res.ok) throw new Error(res.status);
-    D = CACHE[k] = await res.json();
-    D._players = new Map(); D.players.forEach(p => { if (!D._players.has(p.n)) D._players.set(p.n, p); });
-    try { const r2 = await fetch(`hl-${k}.json`); if (r2.ok) D.hl = (await r2.json()).days; } catch (e) { D.hl = []; }
+    try { d = await loadSport(k); } finally { v.classList.remove("busy"); }
+    if (token !== loadToken) return;                      // another tab was clicked while this one loaded
   }
+  D = d;
   SPORT = k; PLAYERS = D._players; NAMES = [...PLAYERS.keys()];
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
@@ -1479,7 +1497,7 @@ async function route() {
   const token = ++loadToken;
   closeModal();
   try {
-    if (sport !== SPORT || !D) await useSport(sport);
+    if (sport !== SPORT || !D) await useSport(sport, token);
   } catch (e) {
     $("view").innerHTML = `<p class="loading">Couldn't load the ${SPORTS[sport].label} puzzles. Refresh the page to try again.</p>`;
     return;
@@ -1511,7 +1529,7 @@ function start() {
   $("btn-help").addEventListener("click", openHelp);
   $("btn-stats").addEventListener("click", openStats);
   window.addEventListener("hashchange", route);
-  route();
+  route().then(prefetchSports);
   setInterval(tick, 1000);
 }
 start();
