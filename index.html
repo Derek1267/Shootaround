@@ -128,7 +128,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .hl-player.bad { border-color: var(--accent); }
 .hl-name { font-weight: 700; font-size: 17px; line-height: 1.2; }
 .hl-ctx { font-size: 13px; color: var(--muted); }
-.hl-val { font-family: var(--display); font-weight: 800; font-size: 54px; line-height: 1; margin-top: auto; padding-top: 10px; font-variant-numeric: tabular-nums; }
+.hl-val { font-family: var(--display); font-weight: 800; font-size: 54px; line-height: 1; margin: auto 0; padding: 10px 0; font-variant-numeric: tabular-nums; }
 .hl-vs { align-self: center; font: 800 18px/1 var(--display); text-transform: uppercase; color: var(--muted); }
 .hl-ask { margin: 16px 0 10px; font-size: 16px; text-align: center; }
 .hl-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -406,6 +406,7 @@ button.sport { background: transparent; cursor: pointer; font-family: var(--disp
   .ticket p { font-size: 16px; }
   .hero-line { max-width: none; font-size: 22px; }
 }
+#view.busy{opacity:.55;transition:opacity .15s}
 </style>
 </head>
 <body>
@@ -1438,8 +1439,10 @@ let loadToken = 0;
 async function useSport(k) {
   if (CACHE[k]) { D = CACHE[k]; }
   else {
-    $("view").innerHTML = `<p class="loading">Loading ${SPORTS[k].label} puzzles…</p>`;
-    const res = await fetch(SPORTS[k].file);
+    const v = $("view");
+    if (D) v.classList.add("busy");                       // switching sports: keep the page where it is
+    else v.innerHTML = `<p class="loading">Loading ${SPORTS[k].label} puzzles…</p>`;
+    const res = await fetch(SPORTS[k].file).finally(() => v.classList.remove("busy"));
     if (!res.ok) throw new Error(res.status);
     D = CACHE[k] = await res.json();
     D._players = new Map(); D.players.forEach(p => { if (!D._players.has(p.n)) D._players.set(p.n, p); });
@@ -1482,9 +1485,10 @@ async function route() {
     return;
   }
   if (token !== loadToken) return;
+  const sameGame = game === current;
   current = game;
   render();
-  window.scrollTo(0, 0);
+  if (!sameGame) window.scrollTo(0, 0);                    // only jump to the top when the game changes, not the sport
   const seenKey = "sa2:seen:" + (GAMES[game] ? game : "home");
   if (!store.get(seenKey, false)) { store.set(seenKey, true); openHelp(); }
 }
