@@ -309,6 +309,9 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .tile { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; will-change: transform; min-height: 72px; padding: 6px 4px; border-radius: 10px; border: 0; cursor: pointer; background: var(--bg); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); font: 700 13px/1.15 var(--body); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; display: flex; align-items: center; justify-content: center; text-align: center; transition: background .12s, color .12s; }
 .tile[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
 .tile:active { transform: scale(.96); }
+.grid.deal .tile { animation: deal .38s cubic-bezier(.2,.9,.3,1.2) backwards; animation-delay: calc(var(--i) * 28ms); }
+.solved.deal .group { animation: rise .35s ease-out backwards; }
+@keyframes deal { from { opacity: 0; transform: translateY(10px) scale(.92); } to { opacity: 1; transform: none; } }
 .tile:disabled { cursor: default; }
 .mistakes { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin: 14px 0 10px; }
 .pips { display: flex; gap: 5px; }
@@ -530,8 +533,8 @@ function nextGameButton(gameId) {
 function wireResult(root, gameId, obj) {
   root.querySelectorAll('[data-act="copy"]').forEach(b => b.addEventListener("click", () => copyShare(b, obj.share())));
   root.querySelectorAll('[data-act="goto"]').forEach(b => b.addEventListener("click", () => { closeModal(); location.hash = b.dataset.to; }));
-  root.querySelectorAll('[data-act="practice"]').forEach(b => b.addEventListener("click", () => { closeModal(); obj.loadPractice(); render(); window.scrollTo(0, 0); }));
-  root.querySelectorAll('[data-act="daily"]').forEach(b => b.addEventListener("click", () => { obj.loadDaily(); render(); }));
+  root.querySelectorAll('[data-act="practice"]').forEach(b => b.addEventListener("click", () => { closeModal(); obj.loadPractice(); viewSeq++; render(); window.scrollTo(0, 0); }));
+  root.querySelectorAll('[data-act="daily"]').forEach(b => b.addEventListener("click", () => { obj.loadDaily(); viewSeq++; render(); }));
   root.querySelectorAll('[data-act="results"]').forEach(b => b.addEventListener("click", () => openModal(gameId, obj, false)));
   root.querySelectorAll('[data-act="archive"]').forEach(b => b.addEventListener("click", () => openArchive(gameId, obj)));
 }
@@ -972,7 +975,7 @@ const k4 = {
       const g = groups[i];
       return `<div class="group ${i === this.landed ? "new" : ""}" style="background:var(--t${g.tier})"><b><span class="shape">${SHAPES[g.tier]} </span>${esc(teamLabel(g.label))}</b><span>${g.p.map(esc).join(", ")}</span></div>`;
     }).join("");
-    const tiles = st.order.map(n => `<button type="button" class="tile" aria-pressed="${st.selected.includes(n)}" data-name="${esc(n)}">${esc(n)}</button>`).join("");
+    const tiles = st.order.map((n, i) => `<button type="button" class="tile" style="--i:${i}" aria-pressed="${st.selected.includes(n)}" data-name="${esc(n)}">${esc(n)}</button>`).join("");
     const pips = Array.from({ length: K4_MISTAKES }, (_, i) => `<span class="pip ${i < st.mistakes ? "used" : ""}"></span>`).join("");
     root.innerHTML = `<div class="layout k4"><div class="main">
       <section class="card" id="k-card">
@@ -993,13 +996,20 @@ const k4 = {
         ${this.clues()}
         ${pageFooter(st)}
       </aside></div>`;
+    if (this.dealt !== viewSeq) {
+      this.dealt = viewSeq;
+      root.querySelectorAll("#k-card .grid, #k-card .solved").forEach(el => el.classList.add("deal"));
+    }
     if (!st.done) {
       root.querySelectorAll(".tile").forEach(t => t.addEventListener("click", () => {
         if (this.busy) return;
         const n = t.dataset.name;
         if (st.selected.includes(n)) st.selected = st.selected.filter(x => x !== n);
         else if (st.selected.length < 4) st.selected.push(n);
-        t.setAttribute("aria-pressed", st.selected.includes(n));
+        const on = st.selected.includes(n), was = t.getAttribute("aria-pressed") === "true";
+        t.setAttribute("aria-pressed", on);
+        if (on !== was && !reduced()) t.animate(on ? [{ transform: "scale(1)" }, { transform: "scale(1.07)" }, { transform: "scale(1)" }]
+                                                    : [{ transform: "scale(1)" }, { transform: "scale(.93)" }, { transform: "scale(1)" }], { duration: 170, easing: "ease-out" });
         $("k-clear").disabled = !st.selected.length; $("k-submit").disabled = st.selected.length !== 4;
       }));
       $("k-shuffle").addEventListener("click", async () => {
@@ -1012,7 +1022,15 @@ const k4 = {
         st.order = shuffle(st.order, Math.random() * 1e6); this.save(); render();
         const g2 = document.querySelector(".grid"); if (g2 && !reduced()) g2.animate([{ opacity: .2 }, { opacity: 1 }], { duration: 160 });
       });
-      $("k-clear").addEventListener("click", () => { st.selected = []; render(); });
+      $("k-clear").addEventListener("click", () => {
+        if (this.busy) return;
+        const was = new Set(st.selected); st.selected = [];
+        root.querySelectorAll(".tile").forEach(t => {
+          t.setAttribute("aria-pressed", "false");
+          if (was.has(t.dataset.name) && !reduced()) t.animate([{ transform: "scale(1)" }, { transform: "scale(.93)" }, { transform: "scale(1)" }], { duration: 170, easing: "ease-out" });
+        });
+        $("k-clear").disabled = true; $("k-submit").disabled = true;
+      });
       $("k-hint").addEventListener("click", () => this.hint());
       $("k-hint2").addEventListener("click", () => this.hint());
       $("k-submit").addEventListener("click", () => this.submit());
@@ -1421,7 +1439,7 @@ function openArchive(gameId, obj) {
     const i = +b.dataset.i;
     closeModal();
     if (i === day.index) obj.loadDaily(); else obj.loadArchive(i);
-    render(); window.scrollTo(0, 0);
+    viewSeq++; render(); window.scrollTo(0, 0);
   }));
 }
 function openSettings() {
@@ -1446,6 +1464,7 @@ function openCredits() {
   </ul></div>`);
 }
 let current = "home";
+let viewSeq = 0;                                          // bumps each time a page is opened, so open-animations run once
 let loadToken = 0;
 const LOADING = {};
 function loadSport(k) {                                   // main + Higher or Lower files fetched together, shared by clicks and prefetch
@@ -1516,6 +1535,7 @@ async function route() {
   if (token !== loadToken) return;
   const sameGame = game === current;
   current = game;
+  viewSeq++;
   render();
   if (!sameGame) window.scrollTo(0, 0);                    // only jump to the top when the game changes, not the sport
   const seenKey = "sa2:seen:" + (GAMES[game] ? game : "home");
