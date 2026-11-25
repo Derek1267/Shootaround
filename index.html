@@ -66,6 +66,8 @@ header { display: flex; flex-direction: column; gap: 12px; }
 .meta strong { color: var(--ink); font-weight: 600; }
 .ico { width: 18px; height: 18px; flex: none; display: inline-block; vertical-align: -3px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.topbar .wordmark { min-width: 0; white-space: nowrap; }
+.tools { flex: none; }
 .tools { display: flex; gap: 6px; }
 .iconbtn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .iconbtn:hover { border-color: var(--accent); color: var(--accent); }
@@ -170,36 +172,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 :root.cb { --t0: #F0E442; --t1: #56B4E9; --t2: #E69F00; --t3: #CC79A7; --good: #0072B2; --near: #E69F00; }
 .shape { display: none; font-size: 15px; line-height: 1; }
 :root.cb .shape { display: inline; }
-@media (min-width: 960px) {
-  .wrap { max-width: 1160px; padding: 26px 32px 56px; gap: 22px; }
-  header { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand sports tools" "meta nav nav"; align-items: center; gap: 14px 28px; }
-  header .topbar { display: contents; }
-  header .wordmark { grid-area: brand; }
-  header .tools { grid-area: tools; }
-  header #meta { grid-area: meta; }
-  header #sportbar { grid-area: sports; max-width: 520px; justify-self: center; width: 100%; }
-  header nav { grid-area: nav; justify-content: flex-end; }
-  header nav a { flex: 0 0 auto; padding: 10px 16px; }
-  .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr); gap: 24px; align-items: start; }
-  .layout.k4 { grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); }
-  .side { position: sticky; top: 16px; }
-  .tile { min-height: 96px; font-size: 15px; border-radius: 12px; }
-  .group { min-height: 96px; }
-  .grid { gap: 10px; }
-  .stop-team { font-size: 34px; }
-  .stop { padding: 8px 0 8px 40px; }
-  .boxline b { font-size: 72px; }
-  .boxline2 b { font-size: 28px; }
-  .tickets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-  .ticket { grid-template-columns: 1fr; grid-template-rows: 8px auto auto 1fr; padding: 0 22px 22px; gap: 14px; min-height: 260px; align-content: start; }
-  .ticket .stripe { margin: 0 -22px; }
-  .ticket .gi { margin-top: 10px; }
-  .ticket .gi .ico { width: 44px !important; height: 44px !important; }
-  .ticket h2 { font-size: 40px; }
-  .ticket .side { flex-direction: row; align-items: center; justify-content: space-between; align-self: end; position: static; }
-  .hero-line { font-size: 22px; max-width: 46ch; }
-  .kinds { grid-template-columns: 1fr; }
-}
+
 .view { display: flex; flex-direction: column; gap: 16px; }
 .loading { color: var(--muted); padding: 40px 0; text-align: center; }
 
@@ -210,15 +183,21 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .sport.on { background: var(--accent); color: #fff; }
 .sport:not(.on):hover { color: var(--ink); }
 .sport small { text-transform: none; font-weight: 500; margin-left: 3px; letter-spacing: 0; }
-.tickets { display: flex; flex-direction: column; gap: 12px; }
-.ticket { display: grid; grid-template-columns: 10px auto 1fr auto; gap: 0 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 16px 0; text-decoration: none; color: inherit; overflow: hidden; }
-.ticket .stripe { align-self: stretch; background: var(--gc); margin: -16px 0; }
-.ticket .gi { width: 34px; height: 34px; color: var(--gc); }
+.tickets { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.ticket { position: relative; display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 16px 16px 24px; text-decoration: none; color: inherit; overflow: hidden; transition: border-color .15s, transform .15s; }
+.ticket:hover { border-color: var(--gc); transform: translateY(-2px); }
+.ticket .stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--gc); }
+.t-top, .t-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.t-foot { margin-top: auto; padding-top: 4px; }
+.ticket .gi { display: inline-flex; width: 30px; height: 30px; color: var(--gc); }
+.ticket .gi .ico { width: 100%; height: 100%; }
+.t-cta { display: inline-flex; align-items: center; gap: 6px; font: 700 13px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--gc); }
+.t-cta .ico { width: 16px; height: 16px; }
+.streak.none { color: var(--muted); font-weight: 500; }
 .ticket .streak { display: inline-flex; align-items: center; gap: 4px; font: 700 13px/1 var(--body); color: var(--muted); font-variant-numeric: tabular-nums; }
 .ticket .streak .ico { width: 15px; height: 15px; color: #e8772e; }
 .ticket h2 { font-family: var(--display); font-weight: 800; font-size: 32px; line-height: 1; margin: 0; text-transform: uppercase; }
-.ticket p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
-.ticket .side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.ticket p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
 .status { display: inline-flex; align-items: center; gap: 4px; font: 700 11px/1 var(--body); letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); }
 .status .ico { width: 13px; height: 13px; }
 .status.won { background: var(--good); border-color: var(--good); color: #fff; }
@@ -249,7 +228,13 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 /* Guess entry */
 .entry { position: relative; display: flex; gap: 8px; }
 .entry #skip { padding: 0 14px; }
-@media (max-width: 420px) { .hide-sm { display: none; } }
+@media (max-width: 420px) {
+  .hide-sm { display: none; }
+  .wordmark { font-size: min(34px, 9vw); }
+  .iconbtn { width: 36px; height: 36px; }
+  .tools { gap: 4px; }
+  .sport { font-size: 13px; padding: 8px 6px; gap: 4px; }
+}
 .entry input { flex: 1; min-width: 0; font: 500 17px var(--body); color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 11px 12px; }
 .entry input:focus { outline: none; border-color: var(--accent); }
 .suggest { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 5; margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 24px rgba(20,8,40,.2); max-height: 260px; overflow-y: auto; }
@@ -374,6 +359,43 @@ canvas.confetti { position: fixed; inset: 0; z-index: 30; pointer-events: none; 
   .boxline2 div:nth-child(5) { border-left: 0; }
   .boxline2 div:nth-child(n+5) { border-top: 1px solid var(--line); }
   .ticket h2 { font-size: 28px; }
+  .t-cta span { display: none; }
+}
+@media (min-width: 960px) and (max-width: 1239px) {
+  header { grid-template-columns: 1fr auto !important; grid-template-areas: "brand tools" "sports sports" "nav nav" "meta meta" !important; }
+  header #sportbar { max-width: none !important; justify-self: stretch !important; }
+  header nav { justify-content: stretch !important; }
+  header nav a { flex: 1 1 0 !important; padding: 10px 8px !important; }
+}
+@media (min-width: 960px) {
+  .wrap { max-width: 1160px; padding: 26px 32px 56px; gap: 22px; }
+  header { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand sports tools" "meta nav nav"; align-items: center; gap: 14px 28px; }
+  header .topbar { display: contents; }
+  header .wordmark { grid-area: brand; }
+  header .tools { grid-area: tools; }
+  header #meta { grid-area: meta; }
+  header #sportbar { grid-area: sports; max-width: 520px; justify-self: center; width: 100%; }
+  header nav { grid-area: nav; justify-content: flex-end; }
+  header nav a { flex: 0 0 auto; padding: 10px 16px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr); gap: 24px; align-items: start; }
+  .layout.k4 { grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); }
+  .side { position: sticky; top: 16px; }
+  .tile { min-height: 96px; font-size: 15px; border-radius: 12px; }
+  .group { min-height: 96px; }
+  .grid { gap: 10px; }
+  .stop-team { font-size: 34px; }
+  .stop { padding: 8px 0 8px 40px; }
+  .boxline b { font-size: 72px; }
+  .boxline2 b { font-size: 28px; }
+  .hero-line { font-size: 22px; max-width: 46ch; }
+  .kinds { grid-template-columns: 1fr; }
+  .tickets { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .ticket { min-height: 230px; padding: 26px 28px 24px 34px; gap: 12px; }
+  .ticket .stripe { width: 8px; }
+  .ticket .gi { width: 42px; height: 42px; }
+  .ticket h2 { font-size: 46px; }
+  .ticket p { font-size: 16px; }
+  .hero-line { max-width: none; font-size: 22px; }
 }
 </style>
 </head>
@@ -1261,19 +1283,20 @@ function renderHome(root) {
   const done = GAME_ORDER.filter(g => ["won", "lost"].includes(gameStatus(g).kind)).length;
   const tickets = GAME_ORDER.map(g => {
     const s = gameStatus(g), G = GAMES[g], streak = getStatsFor(SPORT, G.obj.store).streak;
+    const cta = s.kind === "todo" ? "Play" : s.kind === "live" ? "Continue" : "See result";
     return `<a class="ticket" href="#${SPORT}-${g}" style="--gc:${G.color}"><span class="stripe" aria-hidden="true"></span>
-      <span class="gi">${ICON[GAME_ICON[g]].replace('class="ico"', 'class="ico" style="width:34px;height:34px"')}</span>
-      <div><h2>${G.title}</h2><p>${G.blurb}</p></div>
-      <div class="side"><span class="status ${s.kind}">${s.kind === "won" ? ICON.check : ""}${s.text}</span>${streak ? `<span class="streak" title="Current streak">${ICON.flame}${streak}</span>` : ""}</div></a>`;
+      <div class="t-top"><span class="gi">${ICON[GAME_ICON[g]]}</span>${s.kind === "todo" ? "" : `<span class="status ${s.kind}">${s.kind === "won" ? ICON.check : ""}${s.text}</span>`}</div>
+      <div class="t-body"><h2>${G.title}</h2><p>${G.blurb}</p></div>
+      <div class="t-foot">${streak ? `<span class="streak" title="Current streak">${ICON.flame}${streak} day streak</span>` : `<span class="streak none">No streak yet</span>`}<span class="t-cta"><span>${cta}</span>${ICON.play}</span></div></a>`;
   }).join("");
   const others = Object.keys(SPORTS).filter(k => k !== SPORT).map(k => {
     const n = GAME_ORDER.filter(g => store.get(`sa2:${k}:${GAMES[g].obj.store}:day:${day.key}`, { done: false }).done).length;
-    return `<a href="#${k}">${SPORTS[k].label}</a> ${n}/3`;
+    return `<a href="#${k}">${SPORTS[k].label}</a> ${n}/${GAME_ORDER.length}`;
   }).join(" · ");
   root.innerHTML = `
     <p class="hero-line">Four quick ${LG()} games. New puzzles every day at midnight.</p>
     <div class="tickets">${tickets}</div>
-    <p class="foot-note">${done} of 3 ${LG()} games finished today. Other sports: ${others}. <span class="countdown"></span></p>`;
+    <p class="foot-note">${done} of ${GAME_ORDER.length} ${LG()} games finished today. Other sports: ${others}. <span class="countdown"></span></p>`;
 }
 
 
