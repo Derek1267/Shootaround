@@ -1,10 +1,12 @@
-<p align="center"><img src="og.png" alt="Shootaround: daily sports puzzles" width="640"></p>
+<p align="center"><img src="docs/screenshots/home.png" alt="The Shootaround home page with four daily games" width="760"></p>
 
 # Shootaround
 
 **Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans.** New puzzles every day at midnight, no sign-up, free to play in your browser.
 
-**Play:** https://derek1267.github.io/Shootaround/
+### ▶️ [Play now: derek1267.github.io/Shootaround](https://derek1267.github.io/Shootaround/)
+
+Works on phones, tablets and computers. No account, no ads, no downloads.
 
 ## The games
 
@@ -16,6 +18,21 @@
 | ↕️ **Higher or Lower** | Five quick calls: is the second player's number higher or lower? Questions get harder as you go, and the last one is about a single season. |
 
 Each sport has its own set of all four games and its own streaks. Switch sports with the tabs at the top.
+
+## Screenshots
+
+| Knecht 4 | Higher or Lower |
+|---|---|
+| <img src="docs/screenshots/knecht-4.png" alt="Knecht 4: a grid of 16 NFL players to sort into groups" width="420"> | <img src="docs/screenshots/higher-or-lower.png" alt="Higher or Lower: career hits, Justin Upton versus Lance Berkman" width="420"> |
+| **Journeyman** | **On your phone** |
+| <img src="docs/screenshots/journeyman.png" alt="Journeyman: an NHL player's route through six teams" width="420"> | <img src="docs/screenshots/phone.png" alt="The home page on a phone, with the tab bar at the bottom" width="200"> |
+
+## How to play in 30 seconds
+
+1. Open the site and pick a sport at the top: NBA, NFL, NHL or MLB.
+2. Tap a game. The rules pop up the first time, and you can reopen them any time with the **?** button.
+3. Finish all four, then tap **Copy result** to send your score to friends. It's spoiler-free.
+4. Come back tomorrow: new puzzles arrive at midnight your time.
 
 ## Features
 
@@ -39,7 +56,11 @@ Each sport has its own set of all four games and its own streaks. Switch sports 
 
 ---
 
-## Run your own copy
+## For developers
+
+Want to see how it works, or host your own copy? Everything below is optional, and players don't need any of it.
+
+### Run your own copy
 
 The site is plain HTML, CSS and JavaScript with JSON data files. There's no server or build step needed to play.
 
@@ -60,7 +81,7 @@ python3 -m http.server 8000
    ```
 4. Make sure **Issues** are switched on (Settings → General → Features).
 
-### Files
+#### Files
 
 | File | What it is |
 |---|---|
