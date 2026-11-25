@@ -114,3 +114,7 @@ Please keep these credits if you share or adapt the project, and check each sour
 - NHL covers skaters only (no goalies) and has no award-based groups.
 - Active players' numbers are a snapshot from the last data build and don't update during the season.
 - Title counts credit a player when they finished that season on the championship team.
+
+## License
+
+The code is released under the [MIT License](LICENSE). The sports statistics in the data files come from the sources listed above and remain under their original terms.
