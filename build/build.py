@@ -89,7 +89,8 @@ jm_out = [{
     "n": p["name"], "lvl": day_levels[i],
     "path": [{"t": nickname(s["full"]), "c": city(s["full"]), "y": season(s["from"]) if s["from"] == s["to"] else f"{season(s['from'])} to {season(s['to'])}"} for s in p["path"]],
     "h": {"seasons": span(p), "pos": pos_label(p["pos"]),
-          "draft": draft_label(p), "college": college_label(p)}
+          "draft": draft_label(p), "college": college_label(p),
+          "honors": f'{p["allstar"]} All-Star · {p["rings"]} title{"" if p["rings"] == 1 else "s"}'}
 } for i, p in enumerate(jm_days)]
 
 # ---------- Knecht 4

@@ -680,11 +680,11 @@ function hintsHTML(defs, values, shown) {
   return `<div class="hints">${defs.map((h, i) => {
     const open = i < shown;
     return `<div class="hint ${open ? "open" : ""} ${h.wide ? "wide" : ""}"><div class="hint-label">${h.label}</div>
-      <div class="hint-value">${open ? esc(values[h.key]) : "Unlocks after miss " + (i + 1)}</div></div>`;
+      <div class="hint-value">${open ? esc(values[h.key]) : "Unlocks after miss " + i}</div></div>`;
   }).join("")}</div>`;
 }
 function cluePanel(defs, values, shown) {
-  return `<section class="card" aria-label="Clues"><div class="panel-head">${ICON.bulb}<b>Clues</b><span class="muted">${shown} of ${defs.length} unlocked</span></div>
+  return `<section class="card" aria-label="Clues"><div class="panel-head">${ICON.bulb}<b>Clues</b><span class="muted">${shown} of ${defs.length} open</span></div>
     ${hintsHTML(defs, values, shown)}</section>`;
 }
 function pageFooter(st) {
@@ -700,8 +700,19 @@ function pageFooter(st) {
    GAME 1: JOURNEYMAN
    ===================================================================== */
 const JM_MAX = 6;
-const JM_HINTS = [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "draft", label: "Draft" },
-  { key: "college", label: "College" }, { key: "initials", label: "Initials", wide: true }];
+// Six clues each: the first is open from the start, then one more after every miss (6 guesses = all six by the last guess)
+const JM_HINTS_BY = {
+  nba: [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "draft", label: "Draft" },
+        { key: "honors", label: "All-Star picks · Titles" }, { key: "college", label: "College" }, { key: "initials", label: "Initials" }],
+  nfl: [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "draft", label: "Draft" },
+        { key: "honors", label: "Pro Bowls · All-Pro" }, { key: "origin", label: "College" }, { key: "initials", label: "Initials" }],
+  nhl: [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "draft", label: "Draft" },
+        { key: "honors", label: "Stanley Cups" }, { key: "origin", label: "Birthplace" }, { key: "initials", label: "Initials" }],
+  mlb: [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "hand", label: "Bats · Throws" },
+        { key: "honors", label: "All-Star picks · Titles" }, { key: "origin", label: "Birthplace" }, { key: "initials", label: "Initials" }]
+};
+const jmHints = () => JM_HINTS_BY[SPORT] || JM_HINTS_BY.nba;
+const openClues = (wrong, total, done) => done ? total : Math.min(wrong + 1, total);
 const jm = {
   st: null, store: "journeyman", fresh: -1,
   loadDaily() { this.loadAt(day.index, "daily"); },
@@ -757,14 +768,14 @@ const jm = {
         <span class="stop-sub">${esc(s.c)}</span></li>`;
     }).join("");
     const wrong = st.guesses.filter(g => g !== p.n).length;
-    const shown = st.done ? JM_HINTS.length : Math.min(wrong, JM_HINTS.length);
+    const shown = openClues(wrong, jmHints().length, st.done);
     const rows = Array.from({ length: JM_MAX }, (_, i) => {
       const g = st.guesses[i];
       if (!g) return i === st.guesses.length && !st.done ? `<li class="row empty"><span class="n">${i + 1}</span><span class="who left">${JM_MAX - i} guess${JM_MAX - i === 1 ? "" : "es"} left</span><span></span></li>` : "";
       const f = this.feedback(g);
       return `<li class="row ${f.kind} ${i === this.fresh ? "fresh" : ""}"><span class="n">${i + 1}</span><span class="who">${g === SKIP ? "—" : esc(g)}</span><span class="why">${esc(f.text)}</span></li>`;
     }).join("");
-    const clues = cluePanel((D.spec && D.spec.jm_hints) || JM_HINTS, { ...p.h, initials: initials(p.n) }, shown);
+    const clues = cluePanel(jmHints(), { ...p.h, initials: initials(p.n) }, shown);
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card">
         <div class="title-row"><h2 class="game-title" style="color:var(--g-jm)">Journeyman</h2>${badge(p.lvl, st.mode === "practice")}</div>
@@ -1038,7 +1049,7 @@ const NBA_SPEC = {
            { k: "fg", l: "FG%", f: "p1", tol: .02 }, { k: "x3", l: "3P%", f: "p1", tol: .02 }, { k: "spg", l: "STL", f: "d1", tol: .3 },
            { k: "bpg", l: "BLK", f: "d1", tol: .3 }, { k: "tov", l: "TOV", f: "d1", tol: .4 }] } },
   sl_hints: [{ key: "years", label: "Career" }, { key: "pos", label: "Position" }, { key: "honors", label: "All-Star picks · Titles" },
-             { key: "draft", label: "Draft" }, { key: "college", label: "College", wide: true }]
+             { key: "draft", label: "Draft" }, { key: "college", label: "College" }]
 };
 const spec = () => D.spec || NBA_SPEC;
 const LG = () => SPORTS[SPORT].label;
@@ -1098,15 +1109,15 @@ const sl = {
       }).join("")}</ul>` };
   },
   hintValues() {
-    const h = this.st.ans.h;
+    const h = { ...this.st.ans.h, initials: initials(this.st.ans.n) };
     if (D.spec) return h;
     return { ...h, honors: `${h.as} All-Star · ${h.rings} title${h.rings === "1" ? "" : "s"}` };
   },
   render(root) {
     if (!this.st) this.loadDaily();
-    const st = this.st, a = st.ans, s = this.stats(a.n), R = this.rs(), hints = spec().sl_hints;
+    const st = this.st, a = st.ans, s = this.stats(a.n), R = this.rs(), hints = [...spec().sl_hints.map(h => ({ ...h, wide: false })), { key: "initials", label: "Initials" }];
     const wrong = st.guesses.filter(g => g !== a.n).length;
-    const shown = st.done ? hints.length : Math.min(wrong, hints.length);
+    const shown = openClues(wrong, hints.length, st.done);
     const rows = Array.from({ length: SL_MAX }, (_, i) => {
       const n = st.guesses[i];
       if (!n) return i === st.guesses.length && !st.done ? `<li class="row empty stat"><span class="n">${i + 1}</span><span class="who left">${SL_MAX - i} guess${SL_MAX - i === 1 ? "" : "es"} left</span></li>` : "";
@@ -1328,7 +1339,7 @@ function openSheet(title, html) {
 const HELP = {
   journeyman: () => `<h2>${ICON.route} Journeyman</h2><div class="how"><ul>
     <li>The route shows every ${LG()} team the player played for, in order. You get ${JM_MAX} guesses.</li>
-    <li>Start typing a name and pick from the list. Each miss unlocks a clue at the bottom of the card.</li>
+    <li>Start typing a name and pick from the list. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li><span class="legend" style="background:var(--near)"></span>Your guess shared a team with the answer. <span class="legend" style="background:var(--miss);margin-left:8px"></span>No shared teams.</li>
     <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
   "links": () => `<h2>${ICON.grid} Links</h2><div class="how"><ul>
@@ -1343,7 +1354,7 @@ const HELP = {
     <li>Get 3 or more right to keep your streak going.</li>
     <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li></ul></div>`,
   "stat-line": () => `<h2>${ICON.bars} Stat Line</h2><div class="how"><ul>
-    <li>Name the player from their career numbers. You get ${SL_MAX} guesses; each miss unlocks a clue.</li>
+    <li>Name the player from their career numbers. You get ${SL_MAX} guesses. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li>Each guess shows that player's numbers next to the answer's: an arrow says if the answer is higher ↑ or lower ↓.</li>
     <li><span class="legend" style="background:var(--good)"></span>Exact. <span class="legend" style="background:var(--near);margin-left:8px"></span>Close.</li>
     <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
