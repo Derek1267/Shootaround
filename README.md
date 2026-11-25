@@ -4,7 +4,7 @@
 
 **Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans.** New puzzles every day at midnight, no sign-up, free to play in your browser.
 
-▶️ **Play:** https://derek1267.github.io/Shootaround/
+**Play:** https://derek1267.github.io/Shootaround/
 
 ## The games
 
