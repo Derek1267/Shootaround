@@ -510,7 +510,8 @@ const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matc
 const wait = ms => new Promise(r => setTimeout(r, reduced() ? 0 : ms));
 const store = {
   get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
 };
 function today() {
   const d = new Date();
@@ -558,7 +559,8 @@ function resultBody(gameId, obj) {
     <div class="row-actions">
       <button class="primary" type="button" data-act="copy">${ICON.copy}<span>Copy result</span></button>
       ${daily ? nextGameButton(gameId) : ""}
-      ${daily && hasPractice(gameId) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}${practiceDone(gameId) ? "See your practice round" : "Practice round"}</button>` : ""}
+      ${st.mode === "practice" ? `<button class="ghost" type="button" data-act="practice-again">${ICON.play}Try the practice again</button>`
+        : daily && hasPractice(gameId) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}Practice round</button>` : ""}
     </div>
     ${daily ? statsHTML(obj.store) + '<div class="countdown"></div>' : ""}`;
 }
@@ -570,7 +572,10 @@ function nextGameButton(gameId) {
 function wireResult(root, gameId, obj) {
   root.querySelectorAll('[data-act="copy"]').forEach(b => b.addEventListener("click", () => copyShare(b, obj.share())));
   root.querySelectorAll('[data-act="goto"]').forEach(b => b.addEventListener("click", () => { closeModal(); location.hash = b.dataset.to; }));
-  root.querySelectorAll('[data-act="practice"]').forEach(b => b.addEventListener("click", () => { closeModal(); obj.loadPractice(); viewSeq++; render(); window.scrollTo(0, 0); }));
+  // the practice round is one puzzle you can redo: a finished one starts over, an unfinished one carries on
+  const startPractice = again => { closeModal(); obj.loadPractice(); if (again || obj.st.done) { store.del(obj.st.key); obj.loadPractice(); } viewSeq++; render(); window.scrollTo(0, 0); };
+  root.querySelectorAll('[data-act="practice"]').forEach(b => b.addEventListener("click", () => startPractice(false)));
+  root.querySelectorAll('[data-act="practice-again"]').forEach(b => b.addEventListener("click", () => startPractice(true)));
   root.querySelectorAll('[data-act="daily"]').forEach(b => b.addEventListener("click", () => { obj.loadDaily(); viewSeq++; render(); }));
   root.querySelectorAll('[data-act="results"]').forEach(b => b.addEventListener("click", () => openModal(gameId, obj, false)));
   root.querySelectorAll('[data-act="archive"]').forEach(b => b.addEventListener("click", () => openArchive(gameId, obj)));
@@ -733,6 +738,7 @@ function pageFooter(st) {
   return `<div class="row-actions">
     <button class="ghost" type="button" data-act="archive">${ICON.calendar}Archive</button>
     ${st.done ? `<button class="ghost" type="button" data-act="results">${ICON.stats}See results</button>` : (st.mode !== "practice" && hasPractice(current) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}Practice round</button>` : "")}
+    ${st.done && st.mode === "practice" ? `<button class="ghost" type="button" data-act="practice-again">${ICON.play}Try again</button>` : ""}
     ${st.mode !== "daily" ? `<button class="ghost" type="button" data-act="daily">${ICON.back}Back to today's puzzle</button>` : ""}
   </div>
   <div class="legal"><a class="textlink" href="${reportURL(st)}" target="_blank" rel="noopener">${ICON.flag}Report a problem with this puzzle</a></div>`;
@@ -1432,7 +1438,7 @@ function openHelp() {
       <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Links, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
       <li><b>Modern</b> or <b>All-time</b>: Modern uses players from the 2010s and 2020s; All-time goes back to 1980. Each has its own daily puzzles and streaks.</li>
-      <li>Each game has one practice round for warming up. It's a medium puzzle, separate from the daily ones, and it doesn't touch your stats.</li>
+      <li>Each game has one practice round for warming up: a medium puzzle, separate from the daily ones. You can redo it as often as you like, and it doesn't touch your stats.</li>
       <li>New puzzles arrive at midnight, your time.</li></ul></div>`;
   openSheet("How to play", body + `<div class="row-actions" style="margin-top:14px"><button class="primary" type="button" data-close>${ICON.play}Let's play</button></div>`);
 }
