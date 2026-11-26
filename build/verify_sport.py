@@ -34,6 +34,9 @@ for sport in sys.argv[1:]:
             seen.add(k)
         if len(set(ids)) != 16: errs.append(f"k4 {d}: dup players")
         if knecht.count_solutions(ids, chosen) != 1: errs.append(f"k4 {d}: not unique")
+        fs = set(ids)
+        if any(len(c["m"] & fs) != 4 for c in chosen): errs.append(f"k4 {d}: a link fits more than its four")
+        if any(len(c["m"] & fs) >= 4 for c in cats.values() if c not in chosen): errs.append(f"k4 {d}: another link fits four")
     names = {p["n"] for p in D["players"]}
     for d, j in enumerate(D["journeyman"]):
         p = P[max(byname[j["n"]], key=lambda i: P[i]["fame"])]

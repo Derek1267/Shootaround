@@ -95,6 +95,9 @@ def generate(P, fame, day_levels, days, cats=None, era=None, active_to=2026, sta
     universe = [set(era[:sizes[0]]), set(era[:sizes[1]]), set(era[:sizes[2]])]
     active = {pid for pid in era if P[pid]["to"] >= active_to}
 
+    pcats = collections.defaultdict(list)                 # player -> indexes of the links they fit
+    for ci, c in enumerate(cats):
+        for pid in c["m"]: pcats[pid].append(ci)
     use_p = collections.Counter(); use_c = collections.Counter(); last_c = {}
     seen_groups = set()
     out, tries_total, herr_total = [], 0, 0
@@ -146,25 +149,32 @@ def generate(P, fame, day_levels, days, cats=None, era=None, active_to=2026, sta
                 if len(pick) == 4: break
             if len(pick) < 4 or len(types) < (2 if tries_day > 5000 else 3): why["pick"] += 1; continue
             chosen, ok = [], True
-            taken = set()
+            taken = set(); other = collections.Counter(); pick_ids = {id(c) for c in pick}
             for c in pick:
-                el = [pid for pid in eligible(c, U) if pid not in taken]
-                if len(el) < 4: ok = False; break
-                w = [1.0 / (1 + use_p[pid] * 1.5) * (1.0 / (1 + rank[pid] / 150)) for pid in el]
-                grp = set()
-                while len(grp) < 4:
-                    grp.add(rng.choices(el, weights=w)[0])
-                chosen.append(sorted(grp)); taken |= grp
+                # only players who fit this link and none of the other three, so every link fits exactly its own four
+                el = [pid for pid in eligible(c, U) if pid not in taken and not any(pid in c2["m"] for c2 in pick if c2 is not c)]
+                w = {pid: 1.0 / (1 + use_p[pid] * 1.5) * (1.0 / (1 + rank[pid] / 150)) for pid in el}
+                grp = []
+                while len(grp) < 4 and el:
+                    pid = rng.choices(el, weights=[w[x] for x in el])[0]
+                    el.remove(pid)
+                    # skip anyone who would give some other link a fourth player on the board
+                    if any(other[ci] >= 3 for ci in pcats.get(pid, ()) if id(cats[ci]) not in pick_ids): continue
+                    grp.append(pid)
+                    for ci in pcats.get(pid, ()): other[ci] += 1
+                if len(grp) < 4: ok = False; break
+                chosen.append(sorted(grp)); taken |= set(grp)
             if not ok: why["members"] += 1; continue
             flat = [pid for g in chosen for pid in g]
             if any(frozenset(g) in seen_groups for g in chosen): continue
             if count_solutions(flat, pick) != 1: why["unique"] += 1; continue
             # no accidental fifth group: no other category may hold 5+ of the 16
             fs = set(flat)
-            if any(len(c["m"] & fs) >= (6 if relax else 5) for c in cats if c not in pick): why["fifth"] += 1; continue
-            herrings = sum(1 for pid in flat if sum(pid in c["m"] for c in pick) > 1)
-            if herrings == 0 and not relax and rng.random() < 0.6: continue  # prefer puzzles with a decoy or two
-            if herrings > 4: why["herr"] += 1; continue
+            # strict: every group's link fits exactly its four players and nobody else on the board (no decoys),
+            # and no other link covers four or more of the sixteen (no look-alike fifth group)
+            if any(len(c["m"] & fs) != 4 for c in pick): why["strict"] += 1; continue
+            if any(len(c["m"] & fs) >= 4 for c in cats if c not in pick): why["fifth"] += 1; continue
+            herrings = 0
             break
         herr_total += herrings
         if d % 20 == 0 or tries_day > 2000: print("day", d, "lvl", lvl, "tries", tries_day, flush=True)

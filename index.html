@@ -424,6 +424,15 @@ button.sport { background: transparent; cursor: pointer; font-family: var(--disp
   .hero-line { max-width: none; font-size: 22px; }
 }
 #view.busy{opacity:.55;transition:opacity .15s}
+/* game pages: back to today's games / on to the next game (replaces the game tab bar) */
+header nav#nav { display: flex !important; justify-content: space-between !important; align-items: center; gap: 10px; padding: 0 !important; background: none !important; border: 0 !important; }
+header nav#nav:empty { display: none !important; }
+header nav#nav a.crumb { flex: 0 1 auto !important; display: inline-flex; align-items: center; gap: 6px; padding: 8px 2px !important; border: 0 !important; background: none !important;
+  font: 700 13px/1 var(--body) !important; letter-spacing: .04em; text-transform: uppercase; color: var(--muted) !important; text-decoration: none; flex-direction: row !important; }
+header nav#nav a.crumb:hover { color: var(--accent) !important; }
+header nav#nav a.crumb .ico { width: 16px !important; height: 16px !important; }
+header nav#nav a.crumb.next .ico { transform: rotate(180deg); }
+@media (min-width: 960px) { header { grid-template-areas: "brand tools" "sports sports" "meta meta" "nav nav" !important; } }
 </style>
 </head>
 <body>
@@ -1391,7 +1400,7 @@ const HELP = {
     <li>Find four groups of four players who share something. Tap four, then Submit.</li>
     <li>You can make ${K4_MISTAKES} mistakes. "One away" means three of your four belong together.</li>
     <li>${ICON.bulb} Hints: the first shows what kind of link each group has; the next two name the easiest groups. Hints show in your shared result.</li>
-    <li>Colours go from easiest to trickiest: <span class="legend" style="background:var(--t0)"></span><span class="legend" style="background:var(--t1)"></span><span class="legend" style="background:var(--t2)"></span><span class="legend" style="background:var(--t3)"></span> Some players fit more than one group, but only one way uses all sixteen.</li>
+    <li>Colours go from easiest to trickiest: <span class="legend" style="background:var(--t0)"></span><span class="legend" style="background:var(--t1)"></span><span class="legend" style="background:var(--t2)"></span><span class="legend" style="background:var(--t3)"></span> Every player belongs to exactly one group, and each link fits exactly four players on the board.</li>
     <li>Keyboard: <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li></ul></div>`,
   "higher-lower": () => `<h2>${ICON.updown} Higher or Lower</h2><div class="how"><ul>
     <li>Five questions. Each one shows a stat for one player, then asks if a second player's number is higher or lower.</li>
@@ -1550,10 +1559,13 @@ async function useSport(k, token) {
 }
 function render() {
   const root = $("view");
-  $("nav").innerHTML = [["", "Today", "home"], ...GAME_ORDER.map(g => [g, GAMES[g].title, GAME_ICON[g]])].map(([h, l, ic]) => {
-    const fin = h && ["won", "lost"].includes(gameStatus(h).kind);
-    return `<a href="#${SPORT}${h ? "-" + h : ""}" ${current === (h || "home") ? 'aria-current="page"' : ""}>${ICON[ic]}<span>${h && GAMES[h].short ? `<span class="full">${l}</span><span class="short">${GAMES[h].short}</span>` : l}</span>${fin ? '<span class="done-dot" aria-label="finished"></span>' : ""}</a>`;
-  }).join("");
+  // no game tab bar: on a game page, a light row with a way back to today's games and on to the next one
+  if (GAMES[current]) {
+    const i = GAME_ORDER.indexOf(current), open = g => !["won", "lost"].includes(gameStatus(g).kind);
+    const next = [...GAME_ORDER.slice(i + 1), ...GAME_ORDER.slice(0, i)].find(open) || GAME_ORDER[(i + 1) % GAME_ORDER.length];
+    $("nav").innerHTML = `<a class="crumb" href="#${SPORT}">${ICON.back}All ${SPORT === "soccer" ? "soccer" : LG()} games</a>
+      <a class="crumb next" href="#${SPORT}-${next}">Next: ${GAMES[next].title}${ICON.back}</a>`;
+  } else $("nav").innerHTML = "";
   $("sportbar").innerHTML = sportTabs();
   $("meta").innerHTML = `<span><strong>${LG()} · Day ${day.index + 1}</strong> · ${day.label}</span>${eraSwitch()}`;
   $("era-top").innerHTML = eraSwitch();                   // wide screens show the switch next to the icons instead (no room in the meta row)

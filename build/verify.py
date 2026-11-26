@@ -40,6 +40,9 @@ for d, puz in enumerate(D["knecht"]):
         seen_groups.add(key)
     if sorted(g["tier"] for g in puz["groups"]) != [0, 1, 2, 3]: errs.append(f"k4 day {d}: tiers")
     if count_solutions(pids, chosen) != 1: errs.append(f"k4 day {d}: not unique")
+    fs = set(pids)
+    if any(len(c["m"] & fs) != 4 for c in chosen): errs.append(f"k4 day {d}: a link fits more than its four")
+    if any(len(c["m"] & fs) >= 4 for c in cats.values() if c not in chosen): errs.append(f"k4 day {d}: another link fits four")
 
 for d, j in enumerate(D["journeyman"]):
     p = P[pid_of(j["n"])]
