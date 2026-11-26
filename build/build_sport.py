@@ -126,11 +126,10 @@ def birthplace(p):
 
 def hints(sport, cfg, p):
     if sport == "soccer":
-        b = p["birth"]; born = p["dob"][:4] or "?"
-        place = ", ".join(x for x in [b.get("city"), b.get("country")] if x)
+        born = datetime.date.fromisoformat(p["dob"]).strftime("%B %-d, %Y") if p["dob"] else "—"   # date only: nationality is its own clue
         foot = (p["hand"].get("foot") or "").capitalize()
         caps = p["honors"]["caps"]
-        return {"born": f"{born} · {place}" if place else born, "pos": p["pos"], "nat": p["nat"] or "—",
+        return {"born": born, "pos": p["pos"], "nat": p["nat"] or "—",
                 "foot": " · ".join(x for x in [f"{foot} foot" if foot else "", f"{p['ht'] / 100:.2f} m" if p["ht"] else ""] if x) or "—",
                 "caps": "Not recorded" if caps is None else f"{caps} cap{'s' if caps != 1 else ''} · {p['honors']['ig']} goal{'s' if p['honors']['ig'] != 1 else ''}",
                 "leagues": " · ".join(soccer.BIG[l] for l in soccer.BIG if l in p["leagues"]) or "—"}
@@ -341,6 +340,72 @@ def build(sport):
     print(sport, "players", len(players_out), "jm pool", len(jm_pool), "sl pool", len(retired), "| jm", len(jm_out), "sl", len(sl_out), "k4", len(k4_out))
     print(" ", rep, "| categories", len(cats), collections.Counter(c["type"] for c in cats))
     return data
+
+def practice(sport):
+    """One extra puzzle per game, used only for the Practice round. It is a medium-level pick that is not any day's
+    answer: we take a medium player from late in the year for practice and give that day the best unused player.
+    Also refreshes soccer's Born clue. Only the puzzle files' 'practice' block and those few entries change."""
+    path = _os.path.join(OUT, f"{sport}{SUFFIX}.json")
+    D = json.load(open(path, encoding="utf-8"))
+    cfg = CFG[sport]
+    P = cfg["load"]()
+    dup = {n for n, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= cfg["era_from"] - 10).items() if k > 1}
+    for p in P.values(): p["fame"] = p.get("fame0", p["fame"]); p["fame0"] = p["fame"]; p["fame"] = p["fame0"] * recency(p["to"])
+    if ERA == "modern":
+        P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= MODERN_FROM}
+    era = [p for p in P.values() if p["from"] >= cfg["era_from"] and p["name"] not in dup and p["stats"] is not None and p["role"]]
+    era.sort(key=lambda p: p["fame"], reverse=True)
+    answers = [p for p in era if (p["stats"].get("gp" if sport == "nhl" else "g") or 0) >= MIN_G[sport]]
+    jm_pool = [p for p in answers if len(p["path"]) >= 3 and not p["ambiguous"]]
+    by_name = {p["name"]: p for p in era}
+    jm_entry = lambda p, lvl: {"n": p["name"], "lvl": lvl, "path": [{"t": s_["t"], "c": s_["c"], **({"l": 1} if s_.get("loan") else {})} for s_ in p["path"]], "h": hints(sport, cfg, p)}
+    sl_entry = lambda p, lvl: {"n": p["name"], "r": p["role"], "lvl": lvl, "h": hints(sport, cfg, p)}
+    n_easy, n_med = day_levels.count(0), day_levels.count(1)
+    used = {e["n"] for e in D["journeyman"]} | {e["n"] for e in D["statline"]} | {e["n"] for e in D.get("practice", {}).get("journeyman", [])[:0]}
+    out = {}
+    def swap(kind, ranked, entry, same_role, repl_src=None):
+        nonlocal used
+        listing = D[kind]
+        pos = {e["n"]: i for i, e in enumerate(listing)}
+        band = [p for p in ranked[n_easy:n_easy + n_med] if pos.get(p["name"], -1) >= 60]
+        ranked = repl_src or ranked
+        pick = band[len(band) // 2]
+        idx = pos[pick["name"]]
+        repl = next(p for p in ranked if p["name"] not in used and (not same_role or p["role"] == pick["role"]))
+        listing[idx] = entry(repl, listing[idx]["lvl"]); used |= {repl["name"]}
+        out[kind] = entry(pick, 1)
+        print(f"  {kind}: practice {pick['name']} (was day {idx + 1}); day {idx + 1} is now {repl['name']}")
+    swap("journeyman", jm_pool[:DAYS] + jm_pool[DAYS:], jm_entry, False)
+    if cfg.get("sl_quota"):                                 # same list the daily Stat Line was scheduled from
+        sl_pick = []
+        for role, n in cfg["sl_quota"].items(): sl_pick += [p for p in answers if p["role"] == role][:n]
+        sl_pick.sort(key=lambda p: p["fame"], reverse=True)
+        sl_rank = sorted([p for p in answers if p["role"] in cfg["sl_quota"]], key=lambda p: p["fame"], reverse=True)
+    else:
+        sl_pick = sl_rank = answers
+    swap("statline", sl_pick, sl_entry, bool(cfg.get("sl_quota")), sl_rank)
+    # Links: one medium grid from a different seed; none of its groups may match a daily group
+    era_ids = {p["id"] for p in era[:1600]}
+    retired_ids = {p["id"] for p in era if p["to"] <= cfg["retired_to"]} & era_ids
+    cats = catalog(sport, cfg, P, era_ids, retired_ids)
+    daily_groups = {frozenset(g["p"]) for z in D["knecht"] for g in z["groups"]}
+    for seed in range(9000, 9100):
+        k4, _ = knecht.generate(P, lambda p: p["fame"], [1], 1, cats=cats, era=list(era_ids), active_to=cfg["active_to"], sizes=(240, 400, 580),
+                                static=STATIC, weight=WEIGHT, type_w=TYPE_W, seed=seed)
+        if not any(frozenset(g["p"]) in daily_groups for g in k4[0]["groups"]): break
+    out["knecht"] = k4[0]
+    print("  links:", [g["label"] for g in k4[0]["groups"]])
+    if sport == "soccer":                                   # refresh the Born clue everywhere
+        for e in D["journeyman"] + D["statline"]:
+            if e["n"] in by_name: e["h"]["born"] = hints(sport, cfg, by_name[e["n"]])["born"]
+    D["practice"] = out
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(D, f, ensure_ascii=False, separators=(",", ":"))
+
+if __name__ == "__main__" and "--practice" in sys.argv:
+    for sp in [a for a in sys.argv[1:] if not a.startswith("--")]:
+        print(sp); practice(sp)
+    sys.exit(0)
 
 if __name__ == "__main__":
     for s in [a for a in sys.argv[1:] if not a.startswith("--")]:

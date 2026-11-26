@@ -9,8 +9,8 @@ FILE = "nba.json" if ERA == "all" else f"nba-{ERA}.json"
 import json, random, datetime
 from common import load, per_game, nickname, city
 from knecht import generate as gen_knecht
-import sys as _sys0
-if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys0.argv:
+import sys as _sys0, sys
+if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys0.argv and "--practice" not in _sys0.argv:
     _sys0.exit(f"{FILE} already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
                "Only use --force before launch, or to start a brand-new schedule on purpose.")
 
@@ -99,6 +99,36 @@ jm_out = [{
           "draft": draft_label(p), "college": college_label(p),
           "honors": f'{p["allstar"]} All-Star · {p["rings"]} title{"" if p["rings"] == 1 else "s"}'}
 } for i, p in enumerate(jm_days)]
+
+# ---------- Practice round (see build_sport.practice): python3 build.py --practice
+if "--practice" in sys.argv:
+    path = _os.path.join(OUT, FILE)
+    Dj = json.load(open(path, encoding="utf-8"))
+    n_easy, n_med = day_levels.count(0), day_levels.count(1)
+    used = {e["n"] for e in Dj["journeyman"]} | {e["n"] for e in Dj["statline"]}
+    jm_entry = lambda p, lvl: {"n": p["name"], "lvl": lvl,
+        "path": [{"t": nickname(s["full"]), "c": city(s["full"]), "y": season(s["from"]) if s["from"] == s["to"] else f"{season(s['from'])} to {season(s['to'])}"} for s in p["path"]],
+        "h": {"seasons": span(p), "pos": pos_label(p["pos"]), "draft": draft_label(p), "college": college_label(p),
+              "honors": f'{p["allstar"]} All-Star · {p["rings"]} title{"" if p["rings"] == 1 else "s"}'}}
+    sl_entry = lambda p, lvl: {"n": p["name"], "lvl": lvl, "h": {"years": span(p), "pos": pos_label(p["pos"]),
+        "as": str(p["allstar"]), "rings": str(p["rings"]), "draft": draft_label(p), "college": college_label(p)}}
+    prac = {}
+    for kind, ranked, entry in (("journeyman", jm_pool, jm_entry), ("statline", sl_pool, sl_entry)):
+        listing = Dj[kind]; pos = {e["n"]: i for i, e in enumerate(listing)}
+        band = [p for p in ranked[n_easy:n_easy + n_med] if pos.get(p["name"], -1) >= 60]
+        pick = band[len(band) // 2]; idx = pos[pick["name"]]
+        repl = next(p for p in ranked if p["name"] not in used)
+        listing[idx] = entry(repl, listing[idx]["lvl"]); used.add(repl["name"])
+        prac[kind] = entry(pick, 1)
+        print(f"  {kind}: practice {pick['name']} (was day {idx + 1}); day {idx + 1} is now {repl['name']}")
+    daily_groups = {frozenset(g["p"]) for z in Dj["knecht"] for g in z["groups"]}
+    for seed in range(9000, 9100):
+        k4p, _ = gen_knecht(P, fame, [1], 1, sizes=(240, 400, 580), seed=seed)
+        if not any(frozenset(g["p"]) in daily_groups for g in k4p[0]["groups"]): break
+    prac["knecht"] = k4p[0]; print("  links:", [g["label"] for g in k4p[0]["groups"]])
+    Dj["practice"] = prac
+    json.dump(Dj, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    sys.exit(0)
 
 # ---------- Knecht 4
 k4_out, k4_report = gen_knecht(P, fame, day_levels, DAYS, sizes=(240, 400, 580))

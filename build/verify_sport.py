@@ -22,7 +22,7 @@ for sport in sys.argv[1:]:
     cats = {c["label"]: c for c in B.catalog(sport, cfg, P, era_ids, retired_ids)}
     pid = lambda n: [i for i in byname[n] if i in era_ids][0]
     errs, seen = [], set()
-    for d, pz in enumerate(D["knecht"]):
+    for d, pz in enumerate(D["knecht"] + ([D["practice"]["knecht"]] if "practice" in D else [])):   # practice puzzle checked too
         ids, chosen = [], []
         for g in pz["groups"]:
             c = cats[g["label"]]; chosen.append(c)
@@ -38,11 +38,11 @@ for sport in sys.argv[1:]:
         if any(len(c["m"] & fs) != 4 for c in chosen): errs.append(f"k4 {d}: a link fits more than its four")
         if any(len(c["m"] & fs) >= 4 for c in cats.values() if c not in chosen): errs.append(f"k4 {d}: another link fits four")
     names = {p["n"] for p in D["players"]}
-    for d, j in enumerate(D["journeyman"]):
+    for d, j in enumerate(D["journeyman"] + ([D["practice"]["journeyman"]] if "practice" in D else [])):   # practice puzzle checked too
         p = P[max(byname[j["n"]], key=lambda i: P[i]["fame"])]
         if [s["t"] for s in j["path"]] != [s["t"] for s in p["path"]]: errs.append(f"jm {d}: path {j['n']}")
         if j["n"] not in names: errs.append(f"jm {d}: {j['n']} not guessable")
-    for d, s in enumerate(D["statline"]):
+    for d, s in enumerate(D["statline"] + ([D["practice"]["statline"]] if "practice" in D else [])):   # practice puzzle checked too
         if s["n"] not in names: errs.append(f"sl {d}: {s['n']} not guessable")
     print(f"===== {sport.upper()}: errors {len(errs)}", errs[:10])
     print("  SL roles", collections.Counter(s["r"] for s in D["statline"]), "| groups", len(seen))

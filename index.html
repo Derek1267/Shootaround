@@ -558,10 +558,11 @@ function resultBody(gameId, obj) {
     <div class="row-actions">
       <button class="primary" type="button" data-act="copy">${ICON.copy}<span>Copy result</span></button>
       ${daily ? nextGameButton(gameId) : ""}
-      <button class="ghost" type="button" data-act="practice">${ICON.play}${daily ? "Practice round" : "Another practice round"}</button>
+      ${daily && hasPractice(gameId) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}${practiceDone(gameId) ? "See your practice round" : "Practice round"}</button>` : ""}
     </div>
     ${daily ? statsHTML(obj.store) + '<div class="countdown"></div>' : ""}`;
 }
+function practiceDone(gameId) { const s = store.get(practiceKey(GAMES[gameId].obj.store), null); return !!(s && s.done); }
 function nextGameButton(gameId) {
   const next = GAME_ORDER.find(g => g !== gameId && gameStatus(g).kind !== "won" && gameStatus(g).kind !== "lost");
   return next ? `<button class="ghost" type="button" data-act="goto" data-to="${next}">Next: ${GAMES[next].title}</button>` : "";
@@ -731,7 +732,7 @@ function cluePanel(defs, values, shown) {
 function pageFooter(st) {
   return `<div class="row-actions">
     <button class="ghost" type="button" data-act="archive">${ICON.calendar}Archive</button>
-    ${st.done ? `<button class="ghost" type="button" data-act="results">${ICON.stats}See results</button>` : `<button class="ghost" type="button" data-act="practice">${ICON.play}Practice round</button>`}
+    ${st.done ? `<button class="ghost" type="button" data-act="results">${ICON.stats}See results</button>` : (st.mode !== "practice" && hasPractice(current) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}Practice round</button>` : "")}
     ${st.mode !== "daily" ? `<button class="ghost" type="button" data-act="daily">${ICON.back}Back to today's puzzle</button>` : ""}
   </div>
   <div class="legal"><a class="textlink" href="${reportURL(st)}" target="_blank" rel="noopener">${ICON.flag}Report a problem with this puzzle</a></div>`;
@@ -765,10 +766,9 @@ const jm = {
     const s = store.get(key, null), ok = s && s.name === puzzle.n;
     this.st = { mode, idx: i, key, puzzle, guesses: ok ? s.guesses : [], done: ok ? s.done : false, won: ok ? s.won : false };
   },
-  loadPractice() {
-    const list = D.journeyman, daily = list[dailyIndex(list.length)].n, cur = this.st && this.st.puzzle.n;
-    const pool = list.filter(p => p.n !== daily && p.n !== cur);
-    this.st = { mode: "practice", puzzle: pool[Math.floor(Math.random() * pool.length)], guesses: [], done: false, won: false };
+  loadPractice() {                                        // one practice puzzle per sport, kept like a daily (no endless replays)
+    const puzzle = D.practice.journeyman, key = practiceKey("journeyman"), s = store.get(key, null), ok = s && s.name === puzzle.n;
+    this.st = { mode: "practice", idx: -1, key, puzzle, guesses: ok ? s.guesses : [], done: ok ? s.done : false, won: ok ? s.won : false };
   },
   save() { const st = this.st; if (st.key) store.set(st.key, { name: st.puzzle.n, guesses: st.guesses, done: st.done, won: st.won }); },
   feedback(name) {
@@ -865,15 +865,19 @@ const k4 = {
     this.st = same ? { ...s, mode, idx: i, key, selected: [] } : { ...this.fresh(id, mode, i), idx: i, key };
   },
   loadPractice() {
-    const n = D.knecht.length, daily = dailyIndex(n);
-    let id; do { id = Math.floor(Math.random() * n); } while (id === daily || (this.st && id === this.st.id));
-    this.st = this.fresh(id, "practice");
+    const puz = D.practice.knecht, key = practiceKey("knecht"), s = store.get(key, null), names = puz.groups.flatMap(g => g.p);
+    const same = s && Array.isArray(s.order) && Array.isArray(s.solved) &&
+      [...s.order, ...s.solved.flatMap(gi => (puz.groups[gi] ? puz.groups[gi].p : ["?"]))].sort().join("|") === [...names].sort().join("|");
+    const fresh = { mode: "practice", id: "practice", solved: [], mistakes: 0, history: [], tried: [], selected: [], hints: 0, revealed: [],
+                    order: shuffle(names, 4242), done: false, won: false };
+    this.st = same ? { ...s, mode: "practice", id: "practice", idx: -1, key, selected: [] } : { ...fresh, idx: -1, key };
   },
   save() {
     const st = this.st;
     if (st.key) store.set(st.key, { id: st.id, solved: st.solved, mistakes: st.mistakes, history: st.history, tried: st.tried, order: st.order, hints: st.hints, revealed: st.revealed || [], done: st.done, won: st.won });
   },
-  groups() { return D.knecht[this.st.id].groups; },
+  puz() { return this.st.id === "practice" ? D.practice.knecht : D.knecht[this.st.id]; },
+  groups() { return this.puz().groups; },
   tierOf(name) { return this.groups().find(g => g.p.includes(name)).tier; },
   toast(text) {
     const card = $("k-card"); if (!card) return;
@@ -1014,7 +1018,7 @@ const k4 = {
   },
   render(root) {
     if (!this.st) this.loadDaily();
-    const st = this.st, groups = this.groups(), puz = D.knecht[st.id];
+    const st = this.st, groups = this.groups(), puz = this.puz();
     const solved = st.solved.map(i => {
       const g = groups[i];
       return `<div class="group ${i === this.landed ? "new" : ""}" style="background:var(--t${g.tier})"><b><span class="shape">${SHAPES[g.tier]} </span>${esc(teamLabel(g.label))}</b><span>${g.p.map(esc).join(", ")}</span></div>`;
@@ -1127,9 +1131,8 @@ const sl = {
     this.st = { mode, idx: i, key, ans, guesses: ok ? s.guesses : [], done: ok ? s.done : false, won: ok ? s.won : false };
   },
   loadPractice() {
-    const list = D.statline, daily = list[dailyIndex(list.length)].n, cur = this.st && this.st.ans.n;
-    const pool = list.filter(p => p.n !== daily && p.n !== cur);
-    this.st = { mode: "practice", ans: pool[Math.floor(Math.random() * pool.length)], guesses: [], done: false, won: false };
+    const ans = D.practice.statline, key = practiceKey("statline"), s = store.get(key, null), ok = s && s.name === ans.n;
+    this.st = { mode: "practice", idx: -1, key, ans, guesses: ok ? s.guesses : [], done: ok ? s.done : false, won: ok ? s.won : false };
   },
   save() { const st = this.st; if (st.key) store.set(st.key, { name: st.ans.n, guesses: st.guesses, done: st.done, won: st.won }); },
   role() { return this.st.ans.r || "all"; },
@@ -1233,9 +1236,9 @@ const hl = {
     this.st = { mode, idx: i, key, qs, picks, done, won: ok ? s.won : false, view: done ? HL_N - 1 : picks.length };
   },
   loadPractice() {
-    const n = this.days().length, daily = dailyIndex(n);
-    let i; do { i = Math.floor(Math.random() * n); } while (i === daily || (this.st && i === this.st.idx));
-    this.loadAt(i, "practice");
+    const qs = D.hlPractice, key = practiceKey("hl"), s = store.get(key, null), ok = s && s.sig === this.sig(qs);
+    const picks = ok ? s.picks : [], done = ok ? s.done : false;
+    this.st = { mode: "practice", idx: -1, key, qs, picks, done, won: ok ? s.won : false, view: done ? HL_N - 1 : picks.length };
   },
   sig(qs) { return qs.map(q => q.a.n[0] + q.b.n[0]).join(""); },
   save() { const st = this.st; if (st.key) store.set(st.key, { sig: this.sig(st.qs), picks: st.picks, done: st.done, won: st.won, score: this.score() }); },
@@ -1429,7 +1432,7 @@ function openHelp() {
       <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Links, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
       <li><b>Modern</b> or <b>All-time</b>: Modern uses players from the 2010s and 2020s; All-time goes back to 1980. Each has its own daily puzzles and streaks.</li>
-      <li>Finished today's? Try a practice round from any game. Practice doesn't touch your stats.</li>
+      <li>Each game has one practice round for warming up. It's a medium puzzle, separate from the daily ones, and it doesn't touch your stats.</li>
       <li>New puzzles arrive at midnight, your time.</li></ul></div>`;
   openSheet("How to play", body + `<div class="row-actions" style="margin-top:14px"><button class="primary" type="button" data-close>${ICON.play}Let's play</button></div>`);
 }
@@ -1454,6 +1457,8 @@ document.addEventListener("keydown", e => {
   if (e.key === "Escape" && k4.st.selected.length && !k4.busy) { k4.st.selected = []; render(); }
 });
 
+function practiceKey(storeName) { return `sa2:${ek(SPORT)}:${storeName}:practice`; }   // saved, but never counted in stats
+const hasPractice = g => !!(D && (g === "higher-lower" ? D.hlPractice : D.practice && D.practice[GAMES[g].obj.store]));
 function puzzleKey(storeName, i, mode) {
   if (mode === "practice") return null;
   return mode === "daily" ? `sa2:${ek(SPORT)}:${storeName}:day:${day.key}` : `sa2:${ek(SPORT)}:${storeName}:arch:${i}`;
@@ -1526,7 +1531,7 @@ function loadSport(k, era = ERA) {                       // main + Higher or Low
       fetch(`hl-${k}${sfx}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
     ]).then(([d, h]) => {
       d._players = new Map(); d.players.forEach(p => { if (!d._players.has(p.n)) d._players.set(p.n, p); });
-      d.hl = h ? h.days : []; d._era = era;
+      d.hl = h ? h.days : []; d.hlPractice = h && h.practice; d._era = era;
       return CACHE[key] = d;
     }).finally(() => { delete LOADING[key]; });
   }

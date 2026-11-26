@@ -25,7 +25,7 @@ def pid_of(n, label=None):
 
 errs = []
 labels = collections.Counter(); seen_groups = set(); dup_groups = 0; levels = collections.Counter()
-for d, puz in enumerate(D["knecht"]):
+for d, puz in enumerate(D["knecht"] + ([D["practice"]["knecht"]] if "practice" in D else [])):   # practice puzzle checked too
     names = [n for g in puz["groups"] for n in g["p"]]
     if len(set(names)) != 16: errs.append(f"k4 day {d}: duplicate names")
     levels[puz["lvl"]] += 1
@@ -44,12 +44,12 @@ for d, puz in enumerate(D["knecht"]):
     if any(len(c["m"] & fs) != 4 for c in chosen): errs.append(f"k4 day {d}: a link fits more than its four")
     if any(len(c["m"] & fs) >= 4 for c in cats.values() if c not in chosen): errs.append(f"k4 day {d}: another link fits four")
 
-for d, j in enumerate(D["journeyman"]):
+for d, j in enumerate(D["journeyman"] + ([D["practice"]["journeyman"]] if "practice" in D else [])):   # practice puzzle checked too
     p = P[pid_of(j["n"])]
     if [s["t"] for s in j["path"]] != [s["full"].split()[-1] if not s["full"].endswith("Trail Blazers") else "Trail Blazers" for s in p["path"]]:
         errs.append(f"jm day {d}: path mismatch for {j['n']}")
 names = {p["n"] for p in D["players"]}
-for d, s in enumerate(D["statline"]):
+for d, s in enumerate(D["statline"] + ([D["practice"]["statline"]] if "practice" in D else [])):   # practice puzzle checked too
     if s["n"] not in names: errs.append(f"sl day {d}: {s['n']} missing from player pool")
 
 print("errors:", len(errs)); print("\n".join(errs[:20]))

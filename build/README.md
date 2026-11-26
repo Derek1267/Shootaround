@@ -53,6 +53,13 @@ python3 hl_build.py nba nfl nhl mlb soccer --force   # Higher or Lower
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 ```
 
+**Practice rounds.** Each file also holds one medium practice puzzle per game, used only by the Practice button. It is not any day's answer. Add or refresh it without touching the daily puzzles (except the one day whose medium player becomes the practice answer, which gets the best unused player instead):
+
+```bash
+python3 build.py --practice && python3 build_sport.py nfl nhl mlb soccer --practice
+python3 hl_build.py nba nfl nhl mlb soccer --practice
+```
+
 **Modern era files.** The same scripts build the Modern set (players whose career midpoint is 2010 or later) when `SHOOTAROUND_ERA=modern` is set. They write `nba-modern.json`, `hl-nba-modern.json` and so on, and never touch the All-time files:
 
 ```bash

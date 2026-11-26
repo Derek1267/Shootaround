@@ -170,9 +170,10 @@ def nfl_seasons(names):
 SEASON_FN = {"soccer": soccer.soccer_seasons, "nba": nba_seasons, "nhl": nhl_seasons, "mlb": mlb_seasons, "nfl": nfl_seasons}
 
 # ---------------------------------------------------------------- build
+PRACTICE_ONLY = "--practice" in sys.argv
 def build(sport, force=False):
     out_path = os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")
-    if os.path.exists(out_path) and not force:
+    if os.path.exists(out_path) and not force and not PRACTICE_ONLY:
         sys.exit(f"hl-{sport}{SUFFIX}.json already exists. Published puzzles are frozen; use --force only before launch.")
     D = json.load(open(os.path.join(OUT, f"{sport}{SUFFIX}.json"), encoding="utf-8"))
     pool = [p for p in D["players"] if p.get("s")]          # already sorted most-famous first
@@ -241,7 +242,18 @@ def build(sport, force=False):
             for side in ("a", "b"):
                 v = q[side]["v"]; q[side]["v"] = round(v, 4) if isinstance(v, float) else v
         days.append(qs)
-    json.dump({"sport": sport, "era": ERA, "epoch": D["epoch"], "days": days}, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    # one extra medium round for the Practice button: one warm-up, three harder career calls, one season call
+    pq = [pick_career(0, stats_by_role), pick_career(1, stats_by_role), pick_career(1, stats_by_role), pick_career(1, stats_by_role), pick_season()]
+    for q in pq:
+        for side in ("a", "b"):
+            v = q[side]["v"]; q[side]["v"] = round(v, 4) if isinstance(v, float) else v
+    if PRACTICE_ONLY:                                     # keep the published days exactly as they are
+        old = json.load(open(out_path, encoding="utf-8"))
+        assert old["days"] == days, f"{sport}: rebuilt days differ from the published file; not touching it"
+        old["practice"] = pq
+        json.dump(old, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print(f"{sport}: practice round added ({', '.join(q['s'] for q in pq)})"); return
+    json.dump({"sport": sport, "era": ERA, "epoch": D["epoch"], "days": days, "practice": pq}, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print(f"{sport}: {len(days)} days, {len(days)*5} questions, players with seasons {len(season_players)}, distinct players {len(use_count)}, max uses {max(use_count.values())}")
 
 if __name__ == "__main__":
