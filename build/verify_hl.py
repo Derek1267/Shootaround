@@ -6,7 +6,7 @@ sys.path.insert(0, HERE)
 OUT = os.path.join(HERE, "..")
 import common, hl_build as H
 errs = []
-for sport in ["nba", "nfl", "nhl", "mlb"]:
+for sport in ["nba", "nfl", "nhl", "mlb"] + ([] if SUFFIX else ["soccer"]):   # soccer has one set (no Modern file)
     D = json.load(open(os.path.join(OUT, f"{sport}{SUFFIX}.json"))); HL = json.load(open(os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")))
     S = {p["n"]: p for p in D["players"]}
     ncar = nsea = 0
@@ -15,7 +15,7 @@ for sport in ["nba", "nfl", "nhl", "mlb"]:
         for q in day:
             if H.fmt(q["f"], q["a"]["v"]) == H.fmt(q["f"], q["b"]["v"]): errs.append(f"{sport} {d}: tie")
             if q["a"]["n"] == q["b"]["n"] and q["a"]["c"] == q["b"]["c"]: errs.append(f"{sport} {d}: same side")
-            if q["a"]["c"] == "Career":
+            if q["a"]["c"] in ("Career", "Since 2012–13"):
                 ncar += 1
                 k = next(c["k"] for r in H.CAREER[sport].values() for lv in r for c in lv if c["l"] == q["s"])
                 for side in "ab":

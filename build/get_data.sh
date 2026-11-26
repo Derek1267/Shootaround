@@ -27,4 +27,9 @@ curl -sSL -o nfl/draft_picks.csv https://github.com/nflverse/nflverse-data/relea
 for y in $(seq 1980 2025); do
   [ -s "nfl/roster_$y.csv" ] || curl -sSL -o "nfl/roster_$y.csv" "https://github.com/nflverse/nflverse-data/releases/download/rosters/roster_$y.csv"
 done
+# Soccer: Transfermarkt tables from github.com/dcaribou/transfermarkt-datasets (CC0)
+mkdir -p soccer
+for t in players appearances games clubs competitions transfers; do
+  [ -s "soccer/$t.csv.gz" ] || curl -sSL -o "soccer/$t.csv.gz" "https://pub-e682421888d945d684bcae8890b0ec20.r2.dev/data/$t.csv.gz"
+done
 echo "Raw data ready in $RAW"

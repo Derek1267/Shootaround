@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shootaround</title>
-<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL and MLB fans: Journeyman, Links, Stat Line and Higher or Lower.">
+<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL, MLB and soccer fans: Journeyman, Links, Stat Line and Higher or Lower.">
 <meta property="og:title" content="Shootaround: daily sports puzzles">
-<meta property="og:description" content="Journeyman, Links, Stat Line and Higher or Lower. New NBA, NFL, NHL and MLB puzzles every day.">
+<meta property="og:description" content="Journeyman, Links, Stat Line and Higher or Lower. New NBA, NFL, NHL, MLB and soccer puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://derek1267.github.io/Shootaround/">
 <meta property="og:image" content="https://derek1267.github.io/Shootaround/og.png">
@@ -73,8 +73,9 @@ header { display: flex; flex-direction: column; gap: 12px; }
 .era { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); flex: none; }
 .era button { border: 0; background: transparent; color: var(--muted); font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
 .era button.on { background: var(--accent); color: #fff; }
+.era-note { font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 9px 12px; flex: none; }
 #era-top { display: none; }
-@media (min-width: 1240px) { #era-top { display: inline-flex; align-items: center; margin-right: 6px; } #meta .era { display: none; } }
+@media (min-width: 1240px) { #era-top { display: inline-flex; align-items: center; margin-right: 6px; } #meta .era, #meta .era-note { display: none; } }
 .ico { width: 18px; height: 18px; flex: none; display: inline-block; vertical-align: -3px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .topbar .wordmark { min-width: 0; white-space: nowrap; }
@@ -97,7 +98,10 @@ nav a .done-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 
   nav a[aria-current="page"] { background: var(--accent); color: #fff; }
   #sportbar .sports { padding: 3px; }
   #sportbar .sport { padding: 6px 4px; font-size: 13px; }
+  #sportbar .sports { gap: 2px; }
+  #sportbar .sport { min-width: 0; flex: 1 1 0; }
 }
+@media (max-width: 400px) { #sportbar .sport .ico { display: none; } #sportbar .sport { font-size: 12.5px; padding: 7px 2px; } }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; position: relative; }
 .prompt { margin: 0 0 14px; font-size: 15px; color: var(--muted); }
@@ -441,7 +445,7 @@ button.sport { background: transparent; cursor: pointer; font-family: var(--disp
   <main class="view" id="view"><p class="loading">Loading today's puzzles…</p></main>
   <footer class="legal">
     <span id="foot"></span>
-    <span>Fan-made and just for fun. Not affiliated with or endorsed by the NBA, NFL, NHL, MLB, their teams or players.</span>
+    <span>Fan-made and just for fun. Not affiliated with or endorsed by the NBA, NFL, NHL, MLB, any soccer league, or their teams or players.</span>
     <button class="textlink" type="button" id="btn-credits">Credits &amp; data sources</button>
   </footer>
 </div>
@@ -455,12 +459,15 @@ const SPORTS = {
   nba: { label: "NBA", file: "nba.json", src: "Basketball-Reference", cap: "Per game, regular season, whole NBA career." },
   nfl: { label: "NFL", file: "nfl.json", src: "nflverse (Pro Football Reference draft data and NFL rosters)", cap: "Career totals, regular season, drafted players since 1980." },
   nhl: { label: "NHL", file: "nhl.json", src: "NHL.com", cap: "Career totals, regular season, NHL only." },
-  mlb: { label: "MLB", file: "mlb.json", src: "the Lahman Baseball Database", cap: "Career totals, regular season." }
+  mlb: { label: "MLB", file: "mlb.json", src: "the Lahman Baseball Database", cap: "Career totals, regular season." },
+  soccer: { label: "Soccer", file: "soccer.json", src: "Transfermarkt (via the transfermarkt-datasets project)", eras: false, emoji: "⚽",
+            cap: "League totals since 2012–13, in the top-flight leagues the data covers. Caps and international goals are for the whole career." }
 };
 let SPORT = "nba";
 let ERA = "modern";                                        // "modern" (careers centred on 2010 or later) or "all" (all-time); each has its own daily puzzles
 const ERAS = { modern: { label: "Modern", tip: "Players from the 2010s and 2020s" }, all: { label: "All-time", tip: "Everyone since 1980" } };
-const ek = k => k + (ERA === "modern" ? "-modern" : "");   // storage/cache key: all-time keeps the original keys
+const hasEras = k => !SPORTS[k] || SPORTS[k].eras !== false;   // soccer has one set: its data starts in 2012-13
+const ek = k => k + (ERA === "modern" && hasEras(k) ? "-modern" : "");   // storage/cache key: all-time keeps the original keys
 /* ---- Settings for your GitHub copy: change these two lines to match your repo ---- */
 const GITHUB_REPO = "Derek1267/Shootaround";                       // where "Report a problem" opens an issue
 const SITE_URL = "https://derek1267.github.io/Shootaround/";       // the link added to shared results
@@ -652,7 +659,9 @@ const ICON = {
   nfl: SVG('<ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(-35 12 12)"/><path d="M9 15l6-6M10.5 10.5l1.4 1.4M12.1 8.9l1.4 1.4M8.9 12.1l1.4 1.4"/>'),
   nhl: SVG('<ellipse cx="12" cy="9" rx="8" ry="3"/><path d="M4 9v5c0 1.7 3.6 3 8 3s8-1.3 8-3V9"/>'),
   mlb: SVG('<circle cx="12" cy="12" r="9"/><path d="M7 4.5c2 2.5 2 12.5 0 15M17 4.5c-2 2.5-2 12.5 0 15"/>'),
+  soccer: SVG('<circle cx="12" cy="12" r="9"/><path d="M12 8.2l3.6 2.6-1.4 4.2H9.8l-1.4-4.2zM12 8.2V3.4M15.6 10.8l4.4-1.4M14.2 15l2.7 3.8M9.8 15l-2.7 3.8M8.4 10.8L4 9.4"/>'),
 };
+const SPORT_EMOJI = { nba: "🏀", nfl: "🏈", nhl: "🏒", mlb: "⚾", soccer: "⚽" };
 const GAME_ICON = { journeyman: "route", "links": "grid", "stat-line": "bars", "higher-lower": "updown" };
 
 /* Old names -> today's franchise. Keys are "Nickname" or "Nickname|City" when the nickname alone is ambiguous. */
@@ -728,6 +737,8 @@ const JM_HINTS_BY = {
   mlb: [{ key: "seasons", label: "Seasons" }, { key: "pos", label: "Position" }, { key: "hand", label: "Bats · Throws" },
         { key: "honors", label: "All-Star picks · Titles" }, { key: "origin", label: "Birthplace" }, { key: "initials", label: "Initials" }]
 };
+JM_HINTS_BY.soccer = [{ key: "born", label: "Born" }, { key: "pos", label: "Position" }, { key: "nat", label: "Nationality" },
+  { key: "foot", label: "Foot · Height" }, { key: "caps", label: "International caps" }, { key: "initials", label: "Initials" }];
 const jmHints = () => JM_HINTS_BY[SPORT] || JM_HINTS_BY.nba;
 const openClues = (wrong, total, done) => done ? total : Math.min(wrong + 1, total);
 const jm = {
@@ -766,7 +777,7 @@ const jm = {
   share() {
     const st = this.st, sq = st.guesses.map(g => ({ hit: "🟩", near: "🟨", miss: "⬛", skip: "⬜" })[this.feedback(g).kind]).join("");
     const head = st.mode === "practice" ? `Shootaround ${LGE()} · Journeyman (practice)` : `Shootaround ${LGE()} · Journeyman #${st.idx + 1}`;
-    return `${head}\n🏀 ${st.won ? st.guesses.length : "X"}/${JM_MAX}  ${sq}`;
+    return `${head}\n${SPORT_EMOJI[SPORT] || "🏀"} ${st.won ? st.guesses.length : "X"}/${JM_MAX}  ${sq}`;
   },
   result() {
     const st = this.st, p = st.puzzle;
@@ -781,7 +792,7 @@ const jm = {
     const route = stopsOf(p).map((s, i) => {
       const back = seen.has(s.t); seen.add(s.t);
       return `<li class="stop" style="--i:${i};--c:${(D.colors || TEAM_COLORS)[s.t] || "var(--muted)"}"><span class="dot" aria-hidden="true"></span>
-        <span class="stop-num">${String(i + 1).padStart(2, "0")}</span><span class="stop-team">${esc(s.t)}${back ? '<span class="again">Return</span>' : ""}</span>
+        <span class="stop-num">${String(i + 1).padStart(2, "0")}</span><span class="stop-team">${esc(s.t)}${s.l ? '<span class="again">Loan</span>' : back ? '<span class="again">Return</span>' : ""}</span>
         <span class="stop-sub">${esc(s.c)}</span></li>`;
     }).join("");
     const wrong = st.guesses.filter(g => g !== p.n).length;
@@ -796,7 +807,7 @@ const jm = {
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card">
         <div class="title-row"><h2 class="game-title" style="color:var(--g-jm)">Journeyman</h2>${badge(p.lvl, st.mode === "practice")}</div>
-        <p class="prompt">Name the ${LG()} player who made these <b>${stopsOf(p).length} stops</b>, in order.</p>
+        <p class="prompt">Name the ${SPORT === "soccer" ? "soccer" : LG()} player who made these <b>${stopsOf(p).length} stops</b>, in order.${SPORT === "soccer" ? " Loan spells count as stops." : ""}</p>
         <ol class="route">${route}</ol>
       </section>
       ${stopsOf(p).length <= 5 ? clues : ""}</div>
@@ -1070,7 +1081,8 @@ const FMT = {
   d2: v => v == null ? "—" : v.toFixed(2),
   p1: pct1,
   p3: v => v == null ? "—" : v.toFixed(3).replace(/^0/, ""),
-  pm: v => v == null ? "—" : (v > 0 ? "+" : "") + v
+  pm: v => v == null ? "—" : (v > 0 ? "+" : "") + v,
+  eur: v => v == null ? "—" : "€" + (+v).toLocaleString("en-US", { maximumFractionDigits: 1 }) + "m"
 };
 // NBA spec (nba.json predates per-file specs)
 const NBA_SPEC = {
@@ -1085,7 +1097,7 @@ const NBA_SPEC = {
 };
 const spec = () => D.spec || NBA_SPEC;
 const LG = () => SPORTS[SPORT].label;
-const LGE = () => `${LG()} ${ERAS[ERA].label}`;
+const LGE = () => hasEras(SPORT) ? `${LG()} ${ERAS[ERA].label}` : LG();
 const sl = {
   st: null, store: "statline", fresh: -1,
   loadDaily() { this.loadAt(day.index, "daily"); },
@@ -1166,7 +1178,7 @@ const sl = {
       <section class="card">
         <div class="title-row"><h2 class="game-title" style="color:var(--g-sl)">Stat Line</h2>
           <div class="badges">${R.label ? `<span class="badge">${esc(R.label)}</span>` : ""}${st.mode === "practice" ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div></div>
-        <p class="prompt">Whose <b>career numbers</b> are these?${R.label ? ` This one is a ${R.label.toLowerCase()}.` : ""}</p>
+        <p class="prompt">Whose <b>${SPORT === "soccer" ? "league numbers" : "career numbers"}</b> are these?${R.label ? ` This one is a ${R.label.toLowerCase()}.` : ""}</p>
         <div class="boxline">${R.hero.map(c => `<div><b>${FMT[c.f](s[c.k])}</b><span>${c.l}</span></div>`).join("")}</div>
         <div class="boxline2" style="grid-template-columns:repeat(${Math.min(R.row.length, 7)},1fr)">${R.row.map(c => `<div><b>${FMT[c.f](s[c.k])}</b><span>${c.l}</span></div>`).join("")}</div>
         <p class="boxline-cap">${SPORTS[SPORT].cap}</p>
@@ -1348,7 +1360,7 @@ function renderHome(root) {
     return `<a href="#${k}">${SPORTS[k].label}</a> ${n}/${GAME_ORDER.length}`;
   }).join(" · ");
   root.innerHTML = `
-    <p class="hero-line">Four quick ${LG()} games. New puzzles every day at midnight.</p>
+    <p class="hero-line">Four quick ${SPORT === "soccer" ? "soccer" : LG()} games. New puzzles every day at midnight.</p>
     <div class="tickets">${tickets}</div>
     <p class="foot-note">${done} of ${GAME_ORDER.length} ${LG()} games finished today. Other sports: ${others}. <span class="countdown"></span></p>`;
 }
@@ -1474,9 +1486,10 @@ function openCredits() {
     <li><b>NBA:</b> statistics from Basketball-Reference, via the <a href="https://github.com/sumitrodatta/bball-reference-datasets" target="_blank" rel="noopener">bball-reference-datasets</a> project.</li>
     <li><b>NFL:</b> draft and roster data from <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse</a> (CC-BY-4.0), which includes Pro Football Reference draft data.</li>
     <li><b>NHL:</b> skater statistics from NHL.com, via the <a href="https://github.com/natashk/NHL" target="_blank" rel="noopener">natashk/NHL</a> project.</li>
+    <li><b>Soccer:</b> Transfermarkt data from the <a href="https://github.com/dcaribou/transfermarkt-datasets" target="_blank" rel="noopener">transfermarkt-datasets</a> project (CC0). League numbers start in 2012–13.</li>
     <li><b>MLB:</b> the <a href="https://sabr.org/lahman-database/" target="_blank" rel="noopener">Lahman Baseball Database</a> by Sean Lahman, via the <a href="https://github.com/cdalzell/Lahman" target="_blank" rel="noopener">Lahman R package</a>.</li>
     <li>Championship results for 2026 were checked against news coverage. Puzzles are generated from this data and checked automatically; if you spot a mistake, use "Report a problem".</li>
-    <li>Shootaround is a fan-made project. It is not affiliated with or endorsed by the NBA, NFL, NHL, MLB, any team or any player. No team logos are used.</li>
+    <li>Shootaround is a fan-made project. It is not affiliated with or endorsed by the NBA, NFL, NHL, MLB, MLS, any soccer league or club, or any player. No team logos are used.</li>
   </ul></div>`);
 }
 let current = "home";
@@ -1484,6 +1497,7 @@ let viewSeq = 0;                                          // bumps each time a p
 let loadToken = 0;
 const LOADING = {};
 function loadSport(k, era = ERA) {                       // main + Higher or Lower files fetched together, shared by clicks and prefetch
+  if (!hasEras(k)) era = "all";
   const key = k + (era === "modern" ? "-modern" : "");
   if (CACHE[key]) return Promise.resolve(CACHE[key]);
   if (!LOADING[key]) {
@@ -1500,19 +1514,21 @@ function loadSport(k, era = ERA) {                       // main + Higher or Low
   return LOADING[key];
 }
 function prefetchSports() {                               // after the first page is up, quietly load the other sports in this era
-  const era = ERA, rest = Object.keys(SPORTS).filter(k => !CACHE[k + (era === "modern" ? "-modern" : "")]);
+  const era = ERA, rest = Object.keys(SPORTS).filter(k => !CACHE[k + (era === "modern" && hasEras(k) ? "-modern" : "")]);
   const next = () => { const k = rest.shift(); if (k && era === ERA) loadSport(k, era).catch(() => {}).then(() => setTimeout(next, 50)); };
   (window.requestIdleCallback || (f => setTimeout(f, 800)))(next);
 }
 async function setEra(e) {
   if (!ERAS[e] || e === ERA) return;
   ERA = e; store.set("sa2:era", e);
+  if (!hasEras(SPORT)) { render(); return; }
   const token = ++loadToken;
   try { await useSport(SPORT, token); } catch (err) { $("view").innerHTML = `<p class="loading">Couldn't load the ${ERAS[e].label} puzzles. Refresh the page to try again.</p>`; return; }
   if (token !== loadToken) return;
   viewSeq++; render(); prefetchSports();
 }
 function eraSwitch() {
+  if (!hasEras(SPORT)) return `<span class="era-note" title="The soccer data starts in the 2012–13 season">Since 2012–13</span>`;
   return `<span class="era" role="group" aria-label="Era">${Object.entries(ERAS).map(([k, e]) =>
     `<button type="button" data-era="${k}" class="${k === ERA ? "on" : ""}" aria-pressed="${k === ERA}" title="${e.tip}">${e.label}</button>`).join("")}</span>`;
 }
@@ -1530,7 +1546,7 @@ async function useSport(k, token) {
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
   store.set("sa2:sport", k);
-  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
+  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
 }
 function render() {
   const root = $("view");
@@ -1552,14 +1568,14 @@ async function route() {
   if (h === "knecht-4") h = "links";
   if (GAMES[h]) game = h;                                  // old links like #journeyman
   else {
-    const m = h.match(/^(nba|nfl|nhl|mlb)(?:-(.+))?$/);
+    const m = h.match(/^(nba|nfl|nhl|mlb|soccer)(?:-(.+))?$/);
     if (m) { sport = m[1]; const g2 = m[2] === "knecht-4" ? "links" : m[2]; game = GAMES[g2] ? g2 : "home"; }
   }
   if (!SPORTS[sport]) sport = "nba";
   const token = ++loadToken;
   closeModal();
   try {
-    if (sport !== SPORT || !D || D._era !== ERA) await useSport(sport, token);
+    if (sport !== SPORT || !D || (hasEras(sport) && D._era !== ERA)) await useSport(sport, token);
   } catch (e) {
     $("view").innerHTML = `<p class="loading">Couldn't load the ${SPORTS[sport].label} puzzles. Refresh the page to try again.</p>`;
     return;

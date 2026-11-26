@@ -28,8 +28,8 @@ python3 -m http.server 8000
 | File | What it is |
 |---|---|
 | `index.html` | The whole site: layout, styles and game logic |
-| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json` | 365 days of Journeyman, Links and Stat Line per sport, plus the player lists for guessing |
-| `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json` | 365 days of Higher or Lower per sport (5 questions a day) |
+| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json`, `soccer.json` | 365 days of Journeyman, Links and Stat Line per sport, plus the player lists for guessing |
+| `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json`, `hl-soccer.json` | 365 days of Higher or Lower per sport (5 questions a day) |
 | `*-modern.json` | The same four kinds of file for the Modern era |
 | `logo.svg` | The logo, also used as the browser tab icon |
 | `og.png` | Preview image for shared links |
@@ -48,8 +48,8 @@ pip install -r build/requirements.txt
 cd build
 bash get_data.sh                     # downloads raw data into ../raw-data (~300 MB)
 python3 build.py --force             # NBA: Journeyman, Links, Stat Line (~10 min)
-python3 build_sport.py nfl nhl mlb --force
-python3 hl_build.py nba nfl nhl mlb --force   # Higher or Lower
+python3 build_sport.py nfl nhl mlb soccer --force
+python3 hl_build.py nba nfl nhl mlb soccer --force   # Higher or Lower
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 ```
 
@@ -59,7 +59,7 @@ python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 export SHOOTAROUND_ERA=modern
 python3 build.py --force && python3 build_sport.py nfl nhl mlb --force
 python3 hl_build.py nba nfl nhl mlb --force
-python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
+python3 verify.py && python3 verify_sport.py nfl nhl mlb soccer && python3 verify_hl.py
 ```
 
 The checkers make sure that:
@@ -76,6 +76,8 @@ Every puzzle is generated from real data rather than written by hand:
 - Links grids are built from categories like teams, colleges, draft picks, awards, milestones, birthplaces, heights and names. A solver then checks that only one grouping works, and rejects grids where an unintended fifth group sneaks in.
 
 ## Known limits
+
+- Soccer league numbers start in 2012–13, where the Transfermarkt dataset starts, so soccer has one puzzle set instead of Modern and All-time. Career paths come from transfer records and include loan spells; players whose transfer history has gaps are kept out of Journeyman.
 
 - NFL covers drafted players since 1980, so undrafted players (for example Kurt Warner or Tony Romo) aren't included.
 - NHL covers skaters only (no goalies) and has no award-based groups.

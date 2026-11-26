@@ -8,7 +8,7 @@ MODERN_FROM = 2010
 SUFFIX = "" if ERA == "all" else "-" + ERA
 """Build {sport}.json (NFL, NHL, MLB): guess pool, 365 Journeyman, 365 Stat Line, 365 Knecht 4."""
 import json, random, datetime, collections, sys
-import sports, knecht
+import sports, knecht, soccer
 
 EPOCH = datetime.date(2026, 11, 22)
 DAYS = 365
@@ -85,7 +85,25 @@ CFG = {
   },
 }
 
-MIN_G = {"nfl": 48, "nhl": 300, "mlb": 400}
+SOCCER_ROLE = lambda lab: {"label": lab, "hero": [C("gl","League goals","d0",0), C("ast","Assists","d0",0), C("g","League games","d0",0)],
+    "row": [C("min","Minutes","d0",0), C("gpg","Goals per 90","d2",0), C("yc","Yellow cards","d0",0), C("rc","Red cards","d0",0), C("caps","Caps","d0",0), C("ig","Int'l goals","d0",0)],
+    "cols": [C("gl","G","d0",25), C("ast","A","d0",20), C("g","GP","d0",60), C("min","Min","d0",5000), C("gpg","G/90","d2",.1),
+             C("yc","YC","d0",12), C("caps","Caps","d0",15)]}
+CFG["soccer"] = {
+    "league": "Soccer", "load": soccer.load_soccer, "era_from": 2012, "retired_to": 2024, "active_to": 2025,
+    "season": soccer.season_label, "cup": "", "cups": "", "sl_quota": {"att": 160, "mid": 120, "def": 85},
+    "roles": {"att": SOCCER_ROLE("Forward"), "mid": SOCCER_ROLE("Midfielder"), "def": SOCCER_ROLE("Defender")},
+    "colors": {"Arsenal": "#EF0107", "Chelsea": "#034694", "Liverpool": "#C8102E", "Man City": "#6CABDD", "Man Utd": "#DA291C", "Tottenham": "#132257",
+      "Everton": "#003399", "Newcastle": "#241F20", "Aston Villa": "#670E36", "West Ham": "#7A263A", "Leicester": "#003090", "Real Madrid": "#FEBE10",
+      "Barcelona": "#A50044", "Atlético Madrid": "#CB3524", "Sevilla": "#D81920", "Valencia": "#EE3524", "Villarreal": "#FFE667", "Betis": "#00954C",
+      "Juventus": "#1A1A1A", "AC Milan": "#FB090B", "Inter Milan": "#0068A8", "Napoli": "#12A0D7", "Roma": "#8E1F2F", "Lazio": "#87D8F7",
+      "Fiorentina": "#482E92", "Atalanta": "#1E71B8", "Bayern": "#DC052D", "Dortmund": "#FDE100", "Leverkusen": "#E32221", "RB Leipzig": "#DD0741",
+      "Schalke 04": "#004D9D", "Wolfsburg": "#65B32E", "PSG": "#004170", "Marseille": "#2FAEE0", "Lyon": "#DA0812", "Monaco": "#E7161A",
+      "Lille": "#E01E13", "Inter Miami": "#F7B5CD", "LA Galaxy": "#00245D", "LAFC": "#C39E6D", "Al-Nassr": "#FCD116", "Al-Hilal": "#005BAC",
+      "Ajax": "#D2122E", "Porto": "#00428C", "Benfica": "#E83030", "Celtic": "#018749", "Galatasaray": "#A90432"},
+}
+
+MIN_G = {"nfl": 48, "nhl": 300, "mlb": 400, "soccer": 80}
 
 def schedule(pool, rng):
     need = [day_levels.count(l) for l in range(3)]
@@ -107,6 +125,15 @@ def birthplace(p):
     return ", ".join(x for x in parts if x) or "—"
 
 def hints(sport, cfg, p):
+    if sport == "soccer":
+        b = p["birth"]; born = p["dob"][:4] or "?"
+        place = ", ".join(x for x in [b.get("city"), b.get("country")] if x)
+        foot = (p["hand"].get("foot") or "").capitalize()
+        caps = p["honors"]["caps"]
+        return {"born": f"{born} · {place}" if place else born, "pos": p["pos"], "nat": p["nat"] or "—",
+                "foot": " · ".join(x for x in [f"{foot} foot" if foot else "", f"{p['ht'] / 100:.2f} m" if p["ht"] else ""] if x) or "—",
+                "caps": "Not recorded" if caps is None else f"{caps} cap{'s' if caps != 1 else ''} · {p['honors']['ig']} goal{'s' if p['honors']['ig'] != 1 else ''}",
+                "leagues": " · ".join(soccer.BIG[l] for l in soccer.BIG if l in p["leagues"]) or "—"}
     h = {"seasons": season_span(cfg, p), "pos": p["pos"], "draft": draft_label(p, sport), "cups": f"{p['rings']}"}
     if sport == "nfl":
         h["honors"] = f"{p['honors']['probowl']} Pro Bowl{'s' if p['honors']['probowl'] != 1 else ''} · {p['honors']['allpro']} All-Pro"
@@ -121,6 +148,8 @@ def hints(sport, cfg, p):
     return h
 
 HINT_SPECS = {
+    "soccer": {"jm": [("born","Born"),("pos","Position"),("nat","Nationality"),("foot","Foot · Height"),("caps","International caps"),("initials","Initials")],
+               "sl": [("born","Born"),("pos","Position"),("nat","Nationality"),("leagues","Big leagues played in"),("caps","International caps")]},
     "nfl": {"jm": [("seasons","Seasons"),("pos","Position"),("draft","Draft"),("origin","College"),("initials","Initials")],
             "sl": [("seasons","Career"),("pos","Position"),("honors","Pro Bowls · All-Pro"),("draft","Draft"),("origin","College")]},
     "nhl": {"jm": [("seasons","Seasons"),("pos","Position"),("draft","Draft"),("origin","Birthplace"),("initials","Initials")],
@@ -133,12 +162,12 @@ HINT_SPECS = {
 HINT = {"team": "A franchise they all played for", "college": "Where they played before the pros", "draft": "Draft day",
         "award": "End-of-season hardware", "trophy": "Trophy case", "milestone": "A big career number", "height": "Measure them",
         "loyal": "Never changed jerseys", "name": "Look at the names, not the players", "birth": "Where they were born",
-        "pos": "What they did on the field", "hand": "Which side"}
+        "pos": "What they did on the field", "hand": "Which side", "league": "Where they played", "nation": "Their passport"}
 WEIGHT = {"team": 0.0, "pos": 0.4, "birth": 0.9, "award": 1.0, "trophy": 1.2, "college": 1.5, "draft": 1.6, "height": 2.0,
-          "milestone": 2.2, "loyal": 2.0, "hand": 2.4, "name": 3.2}
+          "milestone": 2.2, "loyal": 2.0, "hand": 2.4, "name": 3.2, "league": 1.0, "nation": 0.9}
 TYPE_W = {"team": 3.0, "college": 2.0, "birth": 2.0, "award": 1.4, "name": 1.3, "draft": 1.1, "milestone": 1.2,
-          "trophy": 0.9, "height": 0.7, "loyal": 0.5, "pos": 0.8, "hand": 0.6}
-STATIC = {"college", "draft", "height", "name", "birth", "pos", "hand", "team", "award"}
+          "trophy": 0.9, "height": 0.7, "loyal": 0.5, "pos": 0.8, "hand": 0.6, "league": 1.5, "nation": 1.8}
+STATIC = {"college", "draft", "height", "name", "birth", "pos", "hand", "team", "award", "nation", "league"}
 
 def catalog(sport, cfg, P, era_ids, retired):
     cats = []
@@ -146,6 +175,36 @@ def catalog(sport, cfg, P, era_ids, retired):
         m = set(members) & era_ids
         if len(m) >= 6: cats.append({"id": cid, "type": typ, "label": label, "hint": HINT[typ], "m": m})
     E = {pid: P[pid] for pid in era_ids}
+    if sport == "soccer":
+        teams = collections.defaultdict(set); nat = collections.defaultdict(set); lg = collections.defaultdict(set)
+        first = collections.defaultdict(set); last = collections.defaultdict(set)
+        for pid, p in E.items():
+            for s_ in p["path"]: teams[s_["t"]].add(pid)
+            if p["nat"]: nat[p["nat"]].add(pid)
+            for l in p["leagues"]: lg[l].add(pid)
+            parts = p["name"].split()
+            if len(parts) >= 2: first[parts[0]].add(pid); last[parts[-1]].add(pid)
+        for t, m in teams.items(): add("team:" + t, "team", f"Played for {t}", m)
+        for c, m in nat.items(): add("nat:" + c, "nation", f"Nationality: {c}", m)
+        T = soccer.tables(); comp_name = {"GB1": "the Premier League", "ES1": "La Liga", "IT1": "Serie A", "L1": "the Bundesliga", "FR1": "Ligue 1",
+            "MLS1": "MLS", "SA1": "the Saudi Pro League", "NL1": "the Eredivisie", "PO1": "Liga Portugal", "TR1": "the Turkish Süper Lig",
+            "SC1": "the Scottish Premiership", "BE1": "the Belgian Pro League", "RU1": "the Russian Premier League", "GR1": "the Greek Super League"}
+        for l, m in lg.items():
+            if l in comp_name: add("lg:" + l, "league", f"Played in {comp_name[l]}", m)
+        for n, m in first.items(): add("first:" + n, "name", f"First name {n}", m)
+        for n, m in last.items(): add("last:" + n, "name", f"Last name {n}", m)
+        posg = {"Goalkeepers": ("Goalkeeper",), "Centre-backs": ("Centre-Back",), "Full-backs": ("Left-Back", "Right-Back"),
+                "Defensive midfielders": ("Defensive Midfield",), "Wingers": ("Left Winger", "Right Winger"), "Centre-forwards": ("Centre-Forward",)}
+        for lab, ps in posg.items(): add("pos:" + lab, "pos", lab, [pid for pid, p in E.items() if p["pos"] in ps])
+        add("foot:l", "hand", "Left-footed", [pid for pid, p in E.items() if p["hand"].get("foot") == "left"])
+        add("ht:tall", "height", "Listed at 1.93 m or taller", [pid for pid, p in E.items() if p["ht"] and p["ht"] >= 193])
+        add("ht:short", "height", "Listed at 1.70 m or shorter", [pid for pid, p in E.items() if p["ht"] and p["ht"] <= 170])
+        add("caps:100", "trophy", "100+ international caps", [pid for pid, p in E.items() if (p["honors"]["caps"] or 0) >= 100])
+        add("ms:gl100", "milestone", "100+ league goals since 2012–13", [pid for pid, p in E.items() if p["tot"]["gl"] >= 100])
+        add("ms:ast60", "milestone", "60+ league assists since 2012–13", [pid for pid, p in E.items() if p["tot"]["ast"] >= 60])
+        # soccer pools are dominated by a few leagues and countries; very big groups would make every grid
+        # have an accidental fifth group, so leave them out
+        return [c for c in cats if len(c["m"]) <= 0.12 * len(era_ids)]
     teams = collections.defaultdict(set)
     for pid, p in E.items():
         for s in p["path"]: teams[s["t"]].add(pid)
@@ -257,14 +316,14 @@ def build(sport):
     sl_out = [{"n": p["name"], "r": p["role"], "lvl": day_levels[i], "h": hints(sport, cfg, p)} for i, p in enumerate(sl_days)]
 
     jm_days = schedule(jm_pool[:DAYS], rng)
-    jm_out = [{"n": p["name"], "lvl": day_levels[i], "path": [{"t": s["t"], "c": s["c"]} for s in p["path"]], "h": hints(sport, cfg, p)}
+    jm_out = [{"n": p["name"], "lvl": day_levels[i], "path": [{"t": s["t"], "c": s["c"], **({"l": 1} if s.get("loan") else {})} for s in p["path"]], "h": hints(sport, cfg, p)}
               for i, p in enumerate(jm_days)]
 
     era_ids = {p["id"] for p in era[:1600]}
     retired_ids = {p["id"] for p in retired} & era_ids
     cats = catalog(sport, cfg, P, era_ids, retired_ids)
     k4_out, rep = knecht.generate(P, lambda p: p["fame"], day_levels, DAYS, cats=cats, era=list(era_ids), active_to=cfg["active_to"], sizes=(240, 400, 580),
-                                  static=STATIC, weight=WEIGHT, type_w=TYPE_W, seed=hash(sport) % 10000 if False else {"nfl": 11, "nhl": 22, "mlb": 33}[sport])
+                                  static=STATIC, weight=WEIGHT, type_w=TYPE_W, seed={"nfl": 11, "nhl": 22, "mlb": 33, "soccer": 44}[sport])
     spec = {
         "roles": cfg["roles"],
         "jm_hints": [{"key": k, "label": l, **({"wide": True} if k == "initials" else {})} for k, l in HINT_SPECS[sport]["jm"]],

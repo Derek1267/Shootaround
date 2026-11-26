@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Four quick daily sports puzzles. New ones every day at midnight.</strong><br>
-  NBA · NFL · NHL · MLB, free in your browser, no sign-up.
+  NBA · NFL · NHL · MLB · Soccer, free in your browser, no sign-up.
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
 
 Each sport has its own set of all four games, its own streaks, an archive of past days and a spoiler-free result to share.
 
-**Modern or All-time:** pick Modern for players from the 2010s and 2020s, or All-time to go back to 1980. Each era has its own daily puzzles and streaks.
+**Modern or All-time:** pick Modern for players from the 2010s and 2020s, or All-time to go back to 1980. Each era has its own daily puzzles and streaks. (Soccer has one set, since its data starts in 2012–13.)
 
 ## How it's built
 
@@ -34,9 +34,9 @@ The site is one static `index.html` (plain HTML, CSS and JavaScript) that reads 
 
 ## Data
 
-NBA from Basketball-Reference via [bball-reference-datasets](https://github.com/sumitrodatta/bball-reference-datasets), NFL from [nflverse](https://github.com/nflverse/nflverse-data) (CC-BY-4.0), NHL from NHL.com via [natashk/NHL](https://github.com/natashk/NHL), and MLB from the [Lahman Baseball Database](https://sabr.org/lahman-database/) via the [Lahman R package](https://github.com/cdalzell/Lahman).
+NBA from Basketball-Reference via [bball-reference-datasets](https://github.com/sumitrodatta/bball-reference-datasets), NFL from [nflverse](https://github.com/nflverse/nflverse-data) (CC-BY-4.0), NHL from NHL.com via [natashk/NHL](https://github.com/natashk/NHL), MLB from the [Lahman Baseball Database](https://sabr.org/lahman-database/) via the [Lahman R package](https://github.com/cdalzell/Lahman), and soccer from Transfermarkt via [transfermarkt-datasets](https://github.com/dcaribou/transfermarkt-datasets) (CC0; league numbers start in 2012–13).
 
-Shootaround is a fan project and is not affiliated with the NBA, NFL, NHL, MLB, any team or any player.
+Shootaround is a fan project and is not affiliated with the NBA, NFL, NHL, MLB, any soccer league, any team or any player.
 
 ## License
 

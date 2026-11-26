@@ -7,7 +7,7 @@ import os, sys, json, random, collections, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.environ.get("SHOOTAROUND_OUT", os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
-import common, sports
+import common, sports, soccer
 
 DAYS = 365
 ERA = os.environ.get("SHOOTAROUND_ERA", "all")     # "modern": reads {sport}-modern.json, writes hl-{sport}-modern.json
@@ -38,7 +38,12 @@ CAREER = {
                   [C("ypr","Career yards per catch","d1"), C("g","Career games played","d0")]),
           "def": ([C("sk","Career sacks","d1"), C("ints","Career interceptions","d0")], [C("g","Career games played","d0"), C("st","Seasons as a starter","d0")])},
 }
+_SC0 = [C("gl","League goals","d0"), C("ast","League assists","d0"), C("g","League games","d0"), C("caps","International caps","d0")]
+_SC1 = [C("ig","International goals","d0"), C("min","League minutes","d0"), C("yc","League yellow cards","d0"),
+        C("mv","Peak Transfermarkt value","eur"), C("gpg","League goals per 90","d2")]
+CAREER["soccer"] = {"att": (_SC0, _SC1), "mid": (_SC0, _SC1), "def": ([C("g","League games","d0"), C("caps","International caps","d0"), C("ast","League assists","d0")], _SC1)}
 SEASON = {
+  "soccer": {r: [C("gl","League goals","d0"), C("ast","League assists","d0")] for r in ("att", "mid")} | {"def": [C("ast","League assists","d0"), C("gl","League goals","d0")]},
   "nba": {"all": [C("ppg","Points per game","d1"), C("rpg","Rebounds per game","d1"), C("apg","Assists per game","d1"), C("fg","FG%","p1"), C("x3m","3-pointers made","d0")]},
   "nhl": {"sk": [C("g","Goals","d0"), C("a","Assists","d0"), C("p","Points","d0"), C("pm","Plus/minus","pm"), C("pim","Penalty minutes","d0")]},
   "mlb": {"hit": [C("hr","Home runs","d0"), C("avg","Batting average","p3"), C("rbi","RBI","d0"), C("sb","Stolen bases","d0"), C("h","Hits","d0")],
@@ -56,6 +61,7 @@ def fmt(f, v):
     if f == "p1": return f"{v*100:.1f}"
     if f == "p3": return f"{v:.3f}"
     if f == "pm": return f"{int(v):+d}"
+    if f == "eur": return f"€{v:g}m"
     return str(v)
 
 # ---------------------------------------------------------------- season tables: name -> [(label, team, role, stats)]
@@ -161,7 +167,7 @@ def nfl_seasons(names):
             out[n].append((season_label("nfl", y), team, "rec", {"recyds": g("receiving_yards"), "rec": g("receptions"), "rectd": g("receiving_tds")}))
     return out
 
-SEASON_FN = {"nba": nba_seasons, "nhl": nhl_seasons, "mlb": mlb_seasons, "nfl": nfl_seasons}
+SEASON_FN = {"soccer": soccer.soccer_seasons, "nba": nba_seasons, "nhl": nhl_seasons, "mlb": mlb_seasons, "nfl": nfl_seasons}
 
 # ---------------------------------------------------------------- build
 def build(sport, force=False):
@@ -203,7 +209,8 @@ def build(sport, force=False):
             key = ("c", stat["k"], frozenset((a["n"], b["n"])))
             if key in used: continue
             used.add(key)
-            return {"s": stat["l"], "f": stat["f"], "a": {"n": a["n"], "c": "Career", "v": va}, "b": {"n": b["n"], "c": "Career", "v": vb}}
+            ctx = "Since 2012–13" if sport == "soccer" and stat["k"] not in ("caps", "ig", "mv") else "Career"   # soccer league data starts in 2012-13
+            return {"s": stat["l"], "f": stat["f"], "a": {"n": a["n"], "c": ctx, "v": va}, "b": {"n": b["n"], "c": ctx, "v": vb}}
         raise RuntimeError("no career pair")
 
     season_players = [n for n in seasons if seasons[n]]
