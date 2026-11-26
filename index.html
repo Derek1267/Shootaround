@@ -858,7 +858,11 @@ const k4 = {
   loadArchive(i) { this.loadAt(i, "archive"); },
   loadAt(i, mode) {
     const n = D.knecht.length, id = ((i % n) + n) % n, key = puzzleKey("knecht", i, mode), s = store.get(key, null);
-    this.st = s && s.id === id ? { ...s, mode, idx: i, key, selected: [] } : { ...this.fresh(id, mode, i), idx: i, key };
+    // only resume a saved game if it is for this exact grid (the puzzles can be regenerated, so check the players too)
+    const groups = D.knecht[id].groups, names = groups.flatMap(g => g.p);
+    const same = s && s.id === id && Array.isArray(s.order) && Array.isArray(s.solved) &&
+      [...s.order, ...s.solved.flatMap(gi => (groups[gi] ? groups[gi].p : ["?"]))].sort().join("|") === [...names].sort().join("|");
+    this.st = same ? { ...s, mode, idx: i, key, selected: [] } : { ...this.fresh(id, mode, i), idx: i, key };
   },
   loadPractice() {
     const n = D.knecht.length, daily = dailyIndex(n);
