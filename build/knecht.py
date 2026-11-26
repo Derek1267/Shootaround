@@ -80,7 +80,9 @@ def count_solutions(players, cats, limit=2):
     rec(0)
     return found
 
-def generate(P, fame, day_levels, days, cats=None, era=None, active_to=2026, static=None, weight=None, type_w=None, seed=4444, sizes=(320, 520, 760)):
+def generate(P, fame, day_levels, days, cats=None, era=None, active_to=2026, static=None, weight=None, type_w=None, seed=4444, sizes=(320, 520, 760),
+             avoid_groups=(), prior_use=None):
+    """avoid_groups / prior_use: groups and player use counts from puzzles already published, when adding more days."""
     """NBA defaults; other sports pass their own catalog (cats), eligible player ids (era) and settings."""
     rng = random.Random(seed)
     STATIC_ = static or STATIC
@@ -98,8 +100,8 @@ def generate(P, fame, day_levels, days, cats=None, era=None, active_to=2026, sta
     pcats = collections.defaultdict(list)                 # player -> indexes of the links they fit
     for ci, c in enumerate(cats):
         for pid in c["m"]: pcats[pid].append(ci)
-    use_p = collections.Counter(); use_c = collections.Counter(); last_c = {}
-    seen_groups = set()
+    use_p = collections.Counter(prior_use or {}); use_c = collections.Counter(); last_c = {}
+    seen_groups = set(avoid_groups)
     out, tries_total, herr_total = [], 0, 0
 
     cap = [10]

@@ -402,6 +402,59 @@ def practice(sport):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(D, f, ensure_ascii=False, separators=(",", ":"))
 
+def extend(sport, n=135):
+    """Add n days to Journeyman, Stat Line and Links; every existing day stays exactly as it is."""
+    import extend as X
+    path = _os.path.join(OUT, f"{sport}{SUFFIX}.json")
+    D = json.load(open(path, encoding="utf-8"))
+    start = len(D["journeyman"])
+    cfg = CFG[sport]; P = cfg["load"]()
+    dup = {nm for nm, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= cfg["era_from"] - 10).items() if k > 1}
+    for p in P.values(): p["fame"] = p.get("fame0", p["fame"]); p["fame0"] = p["fame"]; p["fame"] = p["fame0"] * recency(p["to"])
+    if ERA == "modern":
+        P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= MODERN_FROM}
+    era = [p for p in P.values() if p["from"] >= cfg["era_from"] and p["name"] not in dup and p["stats"] is not None and p["role"]]
+    era.sort(key=lambda p: p["fame"], reverse=True)
+    games = lambda p: p["stats"].get("gp" if sport == "nhl" else "g") or 0
+    # same rules as the first year, with a lower games bar so there are enough players left
+    jm_c = [p for p in era if games(p) >= MIN_G[sport] * 0.5 and len(p["path"]) >= 3 and not p["ambiguous"]]
+    jm_c += [p for p in era if games(p) >= MIN_G[sport] * 0.5 and len(p["path"]) == 2 and not p["ambiguous"]]   # only reached if 3-team careers run out
+    sl_c = [p for p in era if games(p) >= MIN_G[sport] * 0.6 and (not cfg.get("sl_quota") or p["role"] in cfg["sl_quota"])]
+    used = X.used_names(D); rng = random.Random(f"extend-{sport}{SUFFIX}"); lv = X.levels(start, n)
+    jm_new = X.pick(jm_c, used, n); used |= {p["name"] for p in jm_new}
+    sl_new = X.pick(sl_c, used, n, X.role_split(D, n) if cfg.get("sl_quota") else None)
+    jm_days, sl_days = X.schedule(jm_new, lv, rng), X.schedule(sl_new, lv, rng)
+    D["journeyman"] += [{"n": p["name"], "lvl": lv[i], "path": [{"t": s_["t"], "c": s_["c"], **({"l": 1} if s_.get("loan") else {})} for s_ in p["path"]],
+                         "h": hints(sport, cfg, p)} for i, p in enumerate(jm_days)]
+    D["statline"] += [{"n": p["name"], "r": p["role"], "lvl": lv[i], "h": hints(sport, cfg, p)} for i, p in enumerate(sl_days)]
+    # players list (guesses) must include every new answer
+    have = {x["n"] for x in D["players"]}
+    for p in jm_new + sl_new:
+        if p["name"] not in have:
+            D["players"].append({"n": p["name"], "r": p["role"], "t": list(dict.fromkeys(s_["t"] for s_ in p["path"])), "s": p["stats"]})
+            have.add(p["name"])
+    # Links: continue with the same catalog, never repeating a published group, starting from published player use
+    era_ids = {p["id"] for p in era[:1600]}
+    retired_ids = {p["id"] for p in era if p["to"] <= cfg["retired_to"]} & era_ids
+    cats = catalog(sport, cfg, P, era_ids, retired_ids)
+    pid = {p["name"]: p["id"] for p in era}
+    pub = D["knecht"] + ([D["practice"]["knecht"]] if "practice" in D else [])
+    avoid = {frozenset(pid.get(nm) for nm in g["p"]) for z in pub for g in z["groups"]}
+    prior = collections.Counter(pid.get(nm) for z in D["knecht"] for g in z["groups"] for nm in g["p"])
+    k4, _ = knecht.generate(P, lambda p: p["fame"], lv, n, cats=cats, era=list(era_ids), active_to=cfg["active_to"], sizes=(240, 400, 580),
+                            static=STATIC, weight=WEIGHT, type_w=TYPE_W, seed={"nfl": 111, "nhl": 222, "mlb": 333, "soccer": 444}[sport],
+                            avoid_groups=avoid, prior_use=prior)
+    D["knecht"] += k4
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(D, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"  {sport}{SUFFIX}: now {len(D['journeyman'])} JM, {len(D['statline'])} SL, {len(D['knecht'])} Links days; "
+          f"new JM from {jm_days[0]['name'] if False else jm_new[0]['name']} to {jm_new[-1]['name']}, SL {sl_new[0]['name']} to {sl_new[-1]['name']}")
+
+if __name__ == "__main__" and "--extend" in sys.argv:
+    for sp in [a for a in sys.argv[1:] if not a.startswith("--")]:
+        print(sp); extend(sp)
+    sys.exit(0)
+
 if __name__ == "__main__" and "--practice" in sys.argv:
     for sp in [a for a in sys.argv[1:] if not a.startswith("--")]:
         print(sp); practice(sp)

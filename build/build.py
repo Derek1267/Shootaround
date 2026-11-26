@@ -10,7 +10,7 @@ import json, random, datetime
 from common import load, per_game, nickname, city
 from knecht import generate as gen_knecht
 import sys as _sys0, sys
-if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys0.argv and "--practice" not in _sys0.argv:
+if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys0.argv and "--practice" not in _sys0.argv and "--extend" not in _sys0.argv:
     _sys0.exit(f"{FILE} already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
                "Only use --force before launch, or to start a brand-new schedule on purpose.")
 
@@ -99,6 +99,45 @@ jm_out = [{
           "draft": draft_label(p), "college": college_label(p),
           "honors": f'{p["allstar"]} All-Star · {p["rings"]} title{"" if p["rings"] == 1 else "s"}'}
 } for i, p in enumerate(jm_days)]
+
+# ---------- Add 135 more days (see build_sport.extend): python3 build.py --extend
+if "--extend" in sys.argv:
+    import extend as X, collections as _c
+    path = _os.path.join(OUT, FILE)
+    Dj = json.load(open(path, encoding="utf-8")); n = 135; start = len(Dj["journeyman"])
+    wide = [p for p in P.values() if p["from"] >= 1980 and p["name"] not in DUP and per_game(p)["g"] >= (100 if ERA == "modern" else 150)]
+    wide.sort(key=fame, reverse=True)
+    for p in wide: p["fame"] = fame(p)
+    jm_c = [p for p in wide if len(p["path"]) >= 3 and not p["ambiguous"]]
+    # the modern NBA pool runs short of 3-team careers; after those, use well-known 2-team careers
+    jm_c += [p for p in wide if len(p["path"]) == 2 and not p["ambiguous"]]
+    sl_c = [p for p in wide if per_game(p)["g"] >= (150 if ERA == "modern" else 200)]
+    used = X.used_names(Dj); rng = random.Random(f"extend-nba{ERA}"); lv = X.levels(start, n)
+    jm_new = X.pick(jm_c, used, n); used |= {p["name"] for p in jm_new}
+    sl_new = X.pick(sl_c, used, n)
+    jm_d, sl_d = X.schedule(jm_new, lv, rng), X.schedule(sl_new, lv, rng)
+    Dj["journeyman"] += [{"n": p["name"], "lvl": lv[i],
+        "path": [{"t": nickname(s["full"]), "c": city(s["full"]), "y": season(s["from"]) if s["from"] == s["to"] else f"{season(s['from'])} to {season(s['to'])}"} for s in p["path"]],
+        "h": {"seasons": span(p), "pos": pos_label(p["pos"]), "draft": draft_label(p), "college": college_label(p),
+              "honors": f'{p["allstar"]} All-Star · {p["rings"]} title{"" if p["rings"] == 1 else "s"}'}} for i, p in enumerate(jm_d)]
+    Dj["statline"] += [{"n": p["name"], "lvl": lv[i], "h": {"years": span(p), "pos": pos_label(p["pos"]), "as": str(p["allstar"]), "rings": str(p["rings"]),
+        "draft": draft_label(p), "college": college_label(p)}} for i, p in enumerate(sl_d)]
+    have = {x["n"] for x in Dj["players"]}
+    for p in jm_new + sl_new:
+        if p["name"] not in have:
+            pg = per_game(p)
+            Dj["players"].append({"n": p["name"], "a": p["to"] >= 2026, "t": list(dict.fromkeys(nickname(s["full"]) for s in p["path"])),
+                                  "s": {k: pg[k] for k in ["g","ppg","rpg","apg","fg","x3","ft","spg","bpg","tov"]}})
+            have.add(p["name"])
+    pid = {p["name"]: p["id"] for p in P.values() if p["name"] not in DUP}
+    pub = Dj["knecht"] + ([Dj["practice"]["knecht"]] if "practice" in Dj else [])
+    avoid = {frozenset(pid.get(nm) for nm in g["p"]) for z in pub for g in z["groups"]}
+    prior = _c.Counter(pid.get(nm) for z in Dj["knecht"] for g in z["groups"] for nm in g["p"])
+    k4n, _ = gen_knecht(P, fame, lv, n, sizes=(240, 400, 580), seed=5555, avoid_groups=avoid, prior_use=prior)
+    Dj["knecht"] += k4n
+    json.dump(Dj, open(path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    print(f"nba{'' if ERA == 'all' else '-' + ERA}: now {len(Dj['journeyman'])} JM, {len(Dj['statline'])} SL, {len(Dj['knecht'])} Links days")
+    sys.exit(0)
 
 # ---------- Practice round (see build_sport.practice): python3 build.py --practice
 if "--practice" in sys.argv:

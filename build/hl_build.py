@@ -171,11 +171,13 @@ SEASON_FN = {"soccer": soccer.soccer_seasons, "nba": nba_seasons, "nhl": nhl_sea
 
 # ---------------------------------------------------------------- build
 PRACTICE_ONLY = "--practice" in sys.argv
+EXTEND = 135 if "--extend" in sys.argv else 0             # add this many days after the published ones
+SRC = os.environ.get("SHOOTAROUND_HL_SRC")               # where to read {sport}.json from (defaults to OUT)
 def build(sport, force=False):
     out_path = os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")
-    if os.path.exists(out_path) and not force and not PRACTICE_ONLY:
+    if os.path.exists(out_path) and not force and not PRACTICE_ONLY and not EXTEND:
         sys.exit(f"hl-{sport}{SUFFIX}.json already exists. Published puzzles are frozen; use --force only before launch.")
-    D = json.load(open(os.path.join(OUT, f"{sport}{SUFFIX}.json"), encoding="utf-8"))
+    D = json.load(open(os.path.join(SRC or OUT, f"{sport}{SUFFIX}.json"), encoding="utf-8"))
     pool = [p for p in D["players"] if p.get("s")]          # already sorted most-famous first
     rank = {p["n"]: i for i, p in enumerate(pool)}
     role_of = {p["n"]: (p.get("r") or "all") for p in pool}
@@ -190,6 +192,7 @@ def build(sport, force=False):
         end_year = lambda lab: int(lab[:4]) + (1 if sport in ("nba", "nhl") else 0)
         seasons = {n: [x for x in v if end_year(x[0]) >= MODERN_FROM] for n, v in seasons.items()}
     rng = random.Random(f"hl-{sport}")
+    CAP = [14]                                           # most times one player may appear (raised for added days)
     days, used = [], set()
     use_count = collections.Counter()
     rank = rank
@@ -201,7 +204,7 @@ def build(sport, force=False):
             if a is b: continue
             ra = role_of[a["n"]]
             if role_of[b["n"]] != ra or ra not in stats_by_role: continue
-            if use_count[a["n"]] > 14 or use_count[b["n"]] > 14: continue
+            if use_count[a["n"]] > CAP[0] or use_count[b["n"]] > CAP[0]: continue
             stat = rng.choice(stats_by_role[ra][level])
             va, vb = a["s"].get(stat["k"]), b["s"].get(stat["k"])
             if va is None or vb is None: continue
@@ -222,7 +225,7 @@ def build(sport, force=False):
             if na == nb: continue
             sa, sb = rng.choice(seasons[na]), rng.choice(seasons[nb])
             if sa[2] != sb[2] or sa[2] not in SEASON[sport]: continue
-            if use_count[na] > 14 or use_count[nb] > 14: continue
+            if use_count[na] > CAP[0] or use_count[nb] > CAP[0]: continue
             stat = rng.choice(SEASON[sport][sa[2]])
             va, vb = sa[3].get(stat["k"]), sb[3].get(stat["k"])
             if va is None or vb is None or fmt(stat["f"], va) == fmt(stat["f"], vb): continue
@@ -247,6 +250,19 @@ def build(sport, force=False):
     for q in pq:
         for side in ("a", "b"):
             v = q[side]["v"]; q[side]["v"] = round(v, 4) if isinstance(v, float) else v
+    if EXTEND:                                            # keep every published day and the practice round; add new days after them
+        old = json.load(open(out_path, encoding="utf-8"))
+        assert old["days"] == days, f"{sport}: rebuilt days differ from the published file; not touching it"
+        rng = random.Random(f"hl-{sport}{SUFFIX}-more"); CAP[0] = 19
+        for _ in range(EXTEND):
+            qs = [pick_career(0, stats_by_role), pick_career(0, stats_by_role), pick_career(1, stats_by_role), pick_career(1, stats_by_role), pick_season()]
+            for q in qs:
+                use_count[q["a"]["n"]] += 1; use_count[q["b"]["n"]] += 1
+                for side in ("a", "b"):
+                    v = q[side]["v"]; q[side]["v"] = round(v, 4) if isinstance(v, float) else v
+            old["days"].append(qs)
+        json.dump(old, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        print(f"{sport}: now {len(old['days'])} days"); return
     if PRACTICE_ONLY:                                     # keep the published days exactly as they are
         old = json.load(open(out_path, encoding="utf-8"))
         assert old["days"] == days, f"{sport}: rebuilt days differ from the published file; not touching it"
