@@ -75,7 +75,7 @@ header { display: flex; flex-direction: column; gap: 12px; }
 .era button.on { background: var(--accent); color: #fff; }
 .era-note { font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 9px 12px; flex: none; }
 #era-top { display: none; }
-@media (min-width: 1240px) { #era-top { display: inline-flex; align-items: center; margin-right: 6px; } #meta .era, #meta .era-note { display: none; } }
+
 .ico { width: 18px; height: 18px; flex: none; display: inline-block; vertical-align: -3px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .topbar .wordmark { min-width: 0; white-space: nowrap; }
@@ -387,7 +387,7 @@ button.sport { background: transparent; cursor: pointer; font-family: var(--disp
   .ticket h2 { font-size: 28px; }
   .t-cta span { display: none; }
 }
-@media (min-width: 960px) and (max-width: 1239px) {
+@media (min-width: 960px) {   /* five sports + era switch no longer fit beside the logo, so stack: logo/icons, sports, games, date/era */
   header { grid-template-columns: 1fr auto !important; grid-template-areas: "brand tools" "sports sports" "nav nav" "meta meta" !important; }
   header #sportbar { max-width: none !important; justify-self: stretch !important; }
   header nav { justify-content: stretch !important; }
