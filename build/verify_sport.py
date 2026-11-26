@@ -2,17 +2,20 @@ import os as _os
 HERE = _os.path.dirname(_os.path.abspath(__file__))
 RAW = _os.environ.get("SHOOTAROUND_RAW", _os.path.join(HERE, "..", "raw-data"))
 OUT = _os.path.join(HERE, "..")
+import os as _e
+SUFFIX = "" if _e.environ.get("SHOOTAROUND_ERA", "all") == "all" else "-" + _e.environ["SHOOTAROUND_ERA"]
 import json, sys, collections
 import build_sport as B, knecht
 for sport in sys.argv[1:]:
     cfg = B.CFG[sport]; P = cfg["load"]()
     for p in P.values(): p["fame"] = p["fame"] * B.recency(p["to"])
-    D = json.load(open(_os.path.join(OUT, f"{sport}.json"), encoding="utf-8"))
+    dup = {n for n, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= cfg["era_from"] - 10).items() if k > 1}
+    if SUFFIX == "-modern": P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= B.MODERN_FROM}
+    D = json.load(open(_os.path.join(OUT, f"{sport}{SUFFIX}.json"), encoding="utf-8"))
     byname = collections.defaultdict(list)
     for pid, p in P.items(): byname[p["name"]].append(pid)
     era = [p for p in P.values() if p["from"] >= cfg["era_from"] and p["stats"] is not None and p["role"]]
     era.sort(key=lambda p: p["fame"], reverse=True)
-    dup = {n for n, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= cfg["era_from"] - 10).items() if k > 1}
     era = [p for p in era if p["name"] not in dup]
     era_ids = {p["id"] for p in era[:1600]}
     retired_ids = {p["id"] for p in era if p["to"] <= cfg["retired_to"]} & era_ids

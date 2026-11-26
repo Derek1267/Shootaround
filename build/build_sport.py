@@ -2,6 +2,10 @@ import os as _os
 HERE = _os.path.dirname(_os.path.abspath(__file__))
 RAW = _os.environ.get("SHOOTAROUND_RAW", _os.path.join(HERE, "..", "raw-data"))
 OUT = _os.path.join(HERE, "..")
+# Era: "all" (default) writes {sport}.json; "modern" keeps only players whose career midpoint is MODERN_FROM or later and writes {sport}-modern.json
+ERA = _os.environ.get("SHOOTAROUND_ERA", "all")
+MODERN_FROM = 2010
+SUFFIX = "" if ERA == "all" else "-" + ERA
 """Build {sport}.json (NFL, NHL, MLB): guess pool, 365 Journeyman, 365 Stat Line, 365 Knecht 4."""
 import json, random, datetime, collections, sys
 import sports, knecht
@@ -221,14 +225,16 @@ def catalog(sport, cfg, P, era_ids, retired):
 
 # ---------------------------------------------------------------- build
 def build(sport):
-    if _os.path.exists(_os.path.join(OUT, f"{sport}.json")) and "--force" not in sys.argv:
-        sys.exit(f"{sport}.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
+    if _os.path.exists(_os.path.join(OUT, f"{sport}{SUFFIX}.json")) and "--force" not in sys.argv:
+        sys.exit(f"{sport}{SUFFIX}.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
                  "Only use --force before launch, or to start a brand-new schedule on purpose.")
     cfg = CFG[sport]
     rng = random.Random(f"{sport}-2026")
     P = cfg["load"]()
     dup = {n for n, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= cfg["era_from"] - 10).items() if k > 1}
     for p in P.values(): p["fame"] = p.get("fame0", p["fame"]); p["fame0"] = p["fame"]; p["fame"] = p["fame0"] * recency(p["to"])
+    if ERA == "modern":
+        P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= MODERN_FROM}
     era = [p for p in P.values() if p["from"] >= cfg["era_from"] and p["name"] not in dup and p["stats"] is not None and p["role"]]
     era.sort(key=lambda p: p["fame"], reverse=True)
     retired = [p for p in era if p["to"] <= cfg["retired_to"]]
@@ -264,12 +270,12 @@ def build(sport):
         "jm_hints": [{"key": k, "label": l, **({"wide": True} if k == "initials" else {})} for k, l in HINT_SPECS[sport]["jm"]],
         "sl_hints": [{"key": k, "label": l, **({"wide": True} if i == 4 else {})} for i, (k, l) in enumerate(HINT_SPECS[sport]["sl"])],
     }
-    data = {"sport": sport, "league": cfg["league"], "built": datetime.date.today().isoformat(), "epoch": EPOCH.isoformat(),
+    data = {"sport": sport, "era": ERA, "league": cfg["league"], "built": datetime.date.today().isoformat(), "epoch": EPOCH.isoformat(),
             "levels": ["Easy", "Medium", "Hard"], "colors": cfg["colors"], "spec": spec,
             "players": players_out, "journeyman": jm_out, "statline": sl_out, "knecht": k4_out}
-    out = _os.path.join(OUT, f"{sport}.json")
+    out = _os.path.join(OUT, f"{sport}{SUFFIX}.json")
     if _os.path.exists(out) and "--force" not in sys.argv:
-        sys.exit(f"{sport}.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
+        sys.exit(f"{sport}{SUFFIX}.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
                  "Only use --force before launch, or to start a brand-new schedule on purpose.")
     with open(out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))

@@ -3,13 +3,17 @@ HERE = _os.path.dirname(_os.path.abspath(__file__))
 RAW = _os.environ.get("SHOOTAROUND_RAW", _os.path.join(HERE, "..", "raw-data"))
 OUT = _os.path.join(HERE, "..")
 """Independent check of nba.json against the raw data."""
+import os as _e
+SUFFIX = "" if _e.environ.get("SHOOTAROUND_ERA", "all") == "all" else "-" + _e.environ["SHOOTAROUND_ERA"]
 import json, collections
 from common import load, per_game
 from knecht import build_catalog, count_solutions
 
 P = load()
+if SUFFIX == "-modern":                       # mirror build.py: the modern catalog is built from modern players only
+    P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= 2010}
 cats = {c["label"]: c for c in build_catalog(P)}
-D = json.load(open(_os.path.join(OUT, "nba.json"), encoding="utf-8"))
+D = json.load(open(_os.path.join(OUT, f"nba{SUFFIX}.json"), encoding="utf-8"))
 byname = collections.defaultdict(list)
 for pid, p in P.items():
     if p["from"] >= 1980: byname[p["name"]].append(pid)

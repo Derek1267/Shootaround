@@ -26,6 +26,8 @@
 
 Each sport has its own set of all four games, its own streaks, an archive of past days and a spoiler-free result to share.
 
+**Modern or All-time:** pick Modern for players from the 2010s and 2020s, or All-time to go back to 1980. Each era has its own daily puzzles and streaks.
+
 ## How it's built
 
 The site is one static `index.html` (plain HTML, CSS and JavaScript) that reads a year of puzzles from JSON files, served with GitHub Pages. The puzzles are generated from real stats with Python scripts in [`build/`](build/), which also check every answer. See [build/README.md](build/README.md) to run or rebuild your own copy. Stats and streaks are saved only in your browser.

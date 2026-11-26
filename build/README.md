@@ -30,6 +30,7 @@ python3 -m http.server 8000
 | `index.html` | The whole site: layout, styles and game logic |
 | `nba.json`, `nfl.json`, `nhl.json`, `mlb.json` | 365 days of Journeyman, Links and Stat Line per sport, plus the player lists for guessing |
 | `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json` | 365 days of Higher or Lower per sport (5 questions a day) |
+| `*-modern.json` | The same four kinds of file for the Modern era |
 | `logo.svg` | The logo, also used as the browser tab icon |
 | `og.png` | Preview image for shared links |
 | `icon-180.png` | Home-screen icon when someone adds the site to their phone |
@@ -49,6 +50,15 @@ bash get_data.sh                     # downloads raw data into ../raw-data (~300
 python3 build.py --force             # NBA: Journeyman, Links, Stat Line (~10 min)
 python3 build_sport.py nfl nhl mlb --force
 python3 hl_build.py nba nfl nhl mlb --force   # Higher or Lower
+python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
+```
+
+**Modern era files.** The same scripts build the Modern set (players whose career midpoint is 2010 or later) when `SHOOTAROUND_ERA=modern` is set. They write `nba-modern.json`, `hl-nba-modern.json` and so on, and never touch the All-time files:
+
+```bash
+export SHOOTAROUND_ERA=modern
+python3 build.py --force && python3 build_sport.py nfl nhl mlb --force
+python3 hl_build.py nba nfl nhl mlb --force
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 ```
 

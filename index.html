@@ -69,6 +69,12 @@ header { display: flex; flex-direction: column; gap: 12px; }
 .wordmark .logo { width: .9em; height: .9em; flex: none; border-radius: .22em; }
 .meta { font-size: 14px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 .meta strong { color: var(--ink); font-weight: 600; }
+#meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.era { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); flex: none; }
+.era button { border: 0; background: transparent; color: var(--muted); font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
+.era button.on { background: var(--accent); color: #fff; }
+#era-top { display: none; }
+@media (min-width: 1240px) { #era-top { display: inline-flex; align-items: center; margin-right: 6px; } #meta .era { display: none; } }
 .ico { width: 18px; height: 18px; flex: none; display: inline-block; vertical-align: -3px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .topbar .wordmark { min-width: 0; white-space: nowrap; }
@@ -422,6 +428,7 @@ button.sport { background: transparent; cursor: pointer; font-family: var(--disp
     <div class="topbar">
       <a class="wordmark" href="#" id="home-link" aria-label="Shootaround home"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#6d3fd6"/><path d="M47 12 C 35 4, 12 9, 16 22 C 19 31, 46 29, 48 41 C 50 54, 27 59, 15 51" fill="none" stroke="#ffffff" stroke-width="4.6" stroke-linecap="round" stroke-dasharray="0.1 6.4"/><g transform="translate(48 12) scale(.82)"><circle r="7.2" fill="#f59e57"/><path d="M-7.2 0 h14.4 M0 -7.2 v14.4 M-4.6 -5 q4 5 0 10 M4.6 -5 q-4 5 0 10" fill="none" stroke="#3a1d0c" stroke-width="1.25" stroke-linecap="round"/></g><g transform="translate(11.5 17) rotate(-35) scale(.8)"><ellipse rx="7.4" ry="4.6" fill="#8b4a22"/><path d="M-3.2 0 h6.4 M-1.6 -1.4 v2.8 M0 -1.4 v2.8 M1.6 -1.4 v2.8" stroke="#ffffff" stroke-width="1.05" stroke-linecap="round"/></g><g transform="translate(52.5 33) scale(.8)"><path d="M-7 -1.5 v3 a7 2.6 0 0 0 14 0 v-3" fill="#170f24"/><ellipse cy="-1.5" rx="7" ry="2.6" fill="#4a3d66"/></g><g transform="translate(12.5 51) scale(.85)"><circle r="6.8" fill="#ffffff"/><path d="M-3.8 -5.4 q2.8 5.4 0 10.8 M3.8 -5.4 q-2.8 5.4 0 10.8" fill="none" stroke="#d6336c" stroke-width="1.2" stroke-dasharray="1.3 1.3"/></g></svg><b>Shoot<span>around</span></b></a>
       <div class="tools">
+        <span id="era-top"></span>
         <button class="iconbtn" type="button" id="btn-stats" aria-label="Your stats" title="Your stats"></button>
         <button class="iconbtn" type="button" id="btn-settings" aria-label="Settings" title="Settings"></button>
         <button class="iconbtn" type="button" id="btn-help" aria-label="How to play" title="How to play"></button>
@@ -451,6 +458,9 @@ const SPORTS = {
   mlb: { label: "MLB", file: "mlb.json", src: "the Lahman Baseball Database", cap: "Career totals, regular season." }
 };
 let SPORT = "nba";
+let ERA = "modern";                                        // "modern" (careers centred on 2010 or later) or "all" (all-time); each has its own daily puzzles
+const ERAS = { modern: { label: "Modern", tip: "Players from the 2010s and 2020s" }, all: { label: "All-time", tip: "Everyone since 1980" } };
+const ek = k => k + (ERA === "modern" ? "-modern" : "");   // storage/cache key: all-time keeps the original keys
 /* ---- Settings for your GitHub copy: change these two lines to match your repo ---- */
 const GITHUB_REPO = "Derek1267/Shootaround";                       // where "Report a problem" opens an issue
 const SITE_URL = "https://derek1267.github.io/Shootaround/";       // the link added to shared results
@@ -488,8 +498,8 @@ function today() {
 }
 let day = today();
 const dailyIndex = n => ((day.index % n) + n) % n;
-const dayKey = g => `sa2:${SPORT}:${g}:day:${day.key}`;
-const statsKey = g => `sa2:${SPORT}:${g}:stats`;
+const dayKey = g => `sa2:${ek(SPORT)}:${g}:day:${day.key}`;
+const statsKey = g => `sa2:${ek(SPORT)}:${g}:stats`;
 const LEVELS = ["Easy", "Medium", "Hard"];
 const badge = (lvl, practice) => `<div class="badges">${practice ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div>`;
 function archBadge() { const g = GAMES[current], st = g && g.obj.st; return st && st.mode === "archive" ? `<span class="badge pr">Archive · Day ${st.idx + 1}</span>` : ""; }
@@ -755,7 +765,7 @@ const jm = {
   },
   share() {
     const st = this.st, sq = st.guesses.map(g => ({ hit: "🟩", near: "🟨", miss: "⬛", skip: "⬜" })[this.feedback(g).kind]).join("");
-    const head = st.mode === "practice" ? `Shootaround ${LG()} · Journeyman (practice)` : `Shootaround ${LG()} · Journeyman #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Journeyman (practice)` : `Shootaround ${LGE()} · Journeyman #${st.idx + 1}`;
     return `${head}\n🏀 ${st.won ? st.guesses.length : "X"}/${JM_MAX}  ${sq}`;
   },
   result() {
@@ -961,7 +971,7 @@ const k4 = {
   },
   share() {
     const st = this.st;
-    const head = st.mode === "practice" ? `Shootaround ${LG()} · Links (practice)` : `Shootaround ${LG()} · Links #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Links (practice)` : `Shootaround ${LGE()} · Links #${st.idx + 1}`;
     return `${head}${st.hints ? `  💡${st.hints}` : ""}\n${st.history.map(r => r.map(t => TIER_EMOJI[t]).join("")).join("\n")}`;
   },
   result() {
@@ -1075,6 +1085,7 @@ const NBA_SPEC = {
 };
 const spec = () => D.spec || NBA_SPEC;
 const LG = () => SPORTS[SPORT].label;
+const LGE = () => `${LG()} ${ERAS[ERA].label}`;
 const sl = {
   st: null, store: "statline", fresh: -1,
   loadDaily() { this.loadAt(day.index, "daily"); },
@@ -1115,7 +1126,7 @@ const sl = {
   },
   share() {
     const st = this.st, cols = this.rs().cols;
-    const head = st.mode === "practice" ? `Shootaround ${LG()} · Stat Line (practice)` : `Shootaround ${LG()} · Stat Line #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Stat Line (practice)` : `Shootaround ${LGE()} · Stat Line #${st.idx + 1}`;
     const lines = st.guesses.map(n => n === SKIP ? "⬜".repeat(cols.length) : n === st.ans.n ? "🟩".repeat(cols.length) : cols.map(c => ({ hit: "🟩", near: "🟨", miss: "⬛" })[this.cell(this.stats(n), c).kind]).join(""));
     return `${head}  ${st.won ? st.guesses.length : "X"}/${SL_MAX}\n${lines.join("\n")}`;
   },
@@ -1226,7 +1237,7 @@ const hl = {
   next() { if (this.st.picks.length < HL_N) { this.st.view = this.st.picks.length; render(); } },
   share() {
     const st = this.st;
-    const head = st.mode === "practice" ? `Shootaround ${LG()} · Higher or Lower (practice)` : `Shootaround ${LG()} · Higher or Lower #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Higher or Lower (practice)` : `Shootaround ${LGE()} · Higher or Lower #${st.idx + 1}`;
     return `${head}\n${this.score()}/${HL_N}  ${st.picks.map((p, i) => this.right(i) ? "🟩" : "🟥").join("")}`;
   },
   result() {
@@ -1325,7 +1336,7 @@ function sportTabs() {
 function renderHome(root) {
   const done = GAME_ORDER.filter(g => ["won", "lost"].includes(gameStatus(g).kind)).length;
   const tickets = GAME_ORDER.map(g => {
-    const s = gameStatus(g), G = GAMES[g], streak = getStatsFor(SPORT, G.obj.store).streak;
+    const s = gameStatus(g), G = GAMES[g], streak = getStatsFor(ek(SPORT), G.obj.store).streak;
     const cta = s.kind === "todo" ? "Play" : s.kind === "live" ? "Continue" : "See result";
     return `<a class="ticket" href="#${SPORT}-${g}" style="--gc:${G.color}"><span class="stripe" aria-hidden="true"></span>
       <div class="t-top"><span class="gi">${ICON[GAME_ICON[g]]}</span>${s.kind === "todo" ? "" : `<span class="status ${s.kind}">${s.kind === "won" ? ICON.check : ""}${s.text}</span>`}</div>
@@ -1333,7 +1344,7 @@ function renderHome(root) {
       <div class="t-foot">${streak ? `<span class="streak" title="Current streak">${ICON.flame}${streak} day streak</span>` : `<span class="streak none">No streak yet</span>`}<span class="t-cta"><span>${cta}</span>${ICON.play}</span></div></a>`;
   }).join("");
   const others = Object.keys(SPORTS).filter(k => k !== SPORT).map(k => {
-    const n = GAME_ORDER.filter(g => store.get(`sa2:${k}:${GAMES[g].obj.store}:day:${day.key}`, { done: false }).done).length;
+    const n = GAME_ORDER.filter(g => store.get(`sa2:${ek(k)}:${GAMES[g].obj.store}:day:${day.key}`, { done: false }).done).length;
     return `<a href="#${k}">${SPORTS[k].label}</a> ${n}/${GAME_ORDER.length}`;
   }).join(" · ");
   root.innerHTML = `
@@ -1386,6 +1397,7 @@ function openHelp() {
   const body = g ? HELP[current]() : `<h2>How it works</h2><div class="how"><ul>
       <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Links, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
+      <li><b>Modern</b> or <b>All-time</b>: Modern uses players from the 2010s and 2020s; All-time goes back to 1980. Each has its own daily puzzles and streaks.</li>
       <li>Finished today's? Try a practice round from any game. Practice doesn't touch your stats.</li>
       <li>New puzzles arrive at midnight, your time.</li></ul></div>`;
   openSheet("How to play", body + `<div class="row-actions" style="margin-top:14px"><button class="primary" type="button" data-close>${ICON.play}Let's play</button></div>`);
@@ -1395,10 +1407,10 @@ function openStats(sel) {
   const tabs = Object.entries(SPORTS).map(([k, sp]) =>
     `<button type="button" class="sport ${k === sel ? "on" : ""}" data-sp="${k}" aria-pressed="${k === sel}">${ICON[k]}${sp.label}</button>`).join("");
   const rows = GAME_ORDER.map(g => {
-    const s = getStatsFor(sel, GAMES[g].obj.store), pct = s.played ? Math.round(s.wins / s.played * 100) + "%" : "—";
+    const s = getStatsFor(ek(sel), GAMES[g].obj.store), pct = s.played ? Math.round(s.wins / s.played * 100) + "%" : "—";
     return `<tr><td><span style="color:${GAMES[g].color}">${ICON[GAME_ICON[g]]}</span> ${GAMES[g].title}</td><td>${s.played}</td><td>${pct}</td><td>${s.streak}</td><td>${s.best}</td></tr>`;
   }).join("");
-  openSheet("Your stats", `<h2>${ICON.stats} Your stats</h2>
+  openSheet("Your stats", `<h2>${ICON.stats} Your stats <span class="muted" style="font-size:.6em">${ERAS[ERA].label}</span></h2>
     <div class="sports stat-tabs" role="group" aria-label="Sport">${tabs}</div>
     <table class="stat-table"><thead><tr><th>Game</th><th>Played</th><th>Win</th><th>Streak</th><th>Best</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="foot-note" style="margin-top:12px">A win means solving the puzzle (3 or more right in Higher or Lower). Stats are saved in this browser only.</p>`);
@@ -1413,23 +1425,23 @@ document.addEventListener("keydown", e => {
 
 function puzzleKey(storeName, i, mode) {
   if (mode === "practice") return null;
-  return mode === "daily" ? `sa2:${SPORT}:${storeName}:day:${day.key}` : `sa2:${SPORT}:${storeName}:arch:${i}`;
+  return mode === "daily" ? `sa2:${ek(SPORT)}:${storeName}:day:${day.key}` : `sa2:${ek(SPORT)}:${storeName}:arch:${i}`;
 }
-function shareURL() { return `${SITE_URL}#${SPORT}-${current}`; }
+function shareURL() { return `${SITE_URL}?era=${ERA}#${SPORT}-${current}`; }
 function reportURL(st) {
   const g = GAMES[current], ans = st.puzzle ? st.puzzle.n : st.ans ? st.ans.n : null;
   const day_ = st.mode === "practice" ? "practice" : `day ${st.idx + 1}`;
-  const title = `${LG()} ${g ? g.title : ""} ${day_}: `;
+  const title = `${LGE()} ${g ? g.title : ""} ${day_}: `;
   const extra = g && current === "links" ? k4.groups().map(x => `- ${x.label}: ${x.p.join(", ")}`).join("\n")
     : current === "higher-lower" ? st.qs.map((q, i) => `${i + 1}. ${q.s}: ${q.a.n} (${q.a.c}) ${FMT[q.f](q.a.v)} vs ${q.b.n} (${q.b.c}) ${FMT[q.f](q.b.v)}`).join("\n")
     : `Answer: ${ans}`;
-  const body = `**Sport:** ${LG()}\n**Game:** ${g ? g.title : ""}\n**Puzzle:** ${day_}\n\n${extra}\n\n**What's wrong?**\n`;
+  const body = `**Sport:** ${LG()}\n**Era:** ${ERAS[ERA].label}\n**Game:** ${g ? g.title : ""}\n**Puzzle:** ${day_}\n\n${extra}\n\n**What's wrong?**\n`;
   return `https://github.com/${GITHUB_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
 }
 function openArchive(gameId, obj) {
   const storeName = obj.store, items = [];
   for (let i = day.index; i >= 0; i--) {
-    const key = i === day.index ? `sa2:${SPORT}:${storeName}:day:${day.key}` : `sa2:${SPORT}:${storeName}:arch:${i}`;
+    const key = i === day.index ? `sa2:${ek(SPORT)}:${storeName}:day:${day.key}` : `sa2:${ek(SPORT)}:${storeName}:arch:${i}`;
     const s = store.get(key, null);
     const d = new Date(EPOCH + i * 86400000);
     const label = d.toLocaleDateString(undefined, { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" });
@@ -1471,27 +1483,41 @@ let current = "home";
 let viewSeq = 0;                                          // bumps each time a page is opened, so open-animations run once
 let loadToken = 0;
 const LOADING = {};
-function loadSport(k) {                                   // main + Higher or Lower files fetched together, shared by clicks and prefetch
-  if (CACHE[k]) return Promise.resolve(CACHE[k]);
-  if (!LOADING[k]) {
-    LOADING[k] = Promise.all([
-      fetch(SPORTS[k].file).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      fetch(`hl-${k}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+function loadSport(k, era = ERA) {                       // main + Higher or Lower files fetched together, shared by clicks and prefetch
+  const key = k + (era === "modern" ? "-modern" : "");
+  if (CACHE[key]) return Promise.resolve(CACHE[key]);
+  if (!LOADING[key]) {
+    const sfx = era === "modern" ? "-modern" : "";
+    LOADING[key] = Promise.all([
+      fetch(`${k}${sfx}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(`hl-${k}${sfx}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
     ]).then(([d, h]) => {
       d._players = new Map(); d.players.forEach(p => { if (!d._players.has(p.n)) d._players.set(p.n, p); });
-      d.hl = h ? h.days : [];
-      return CACHE[k] = d;
-    }).finally(() => { delete LOADING[k]; });
+      d.hl = h ? h.days : []; d._era = era;
+      return CACHE[key] = d;
+    }).finally(() => { delete LOADING[key]; });
   }
-  return LOADING[k];
+  return LOADING[key];
 }
-function prefetchSports() {                               // after the first page is up, quietly load the other sports
-  const rest = Object.keys(SPORTS).filter(k => !CACHE[k]);
-  const next = () => { const k = rest.shift(); if (k) loadSport(k).catch(() => {}).then(() => setTimeout(next, 50)); };
+function prefetchSports() {                               // after the first page is up, quietly load the other sports in this era
+  const era = ERA, rest = Object.keys(SPORTS).filter(k => !CACHE[k + (era === "modern" ? "-modern" : "")]);
+  const next = () => { const k = rest.shift(); if (k && era === ERA) loadSport(k, era).catch(() => {}).then(() => setTimeout(next, 50)); };
   (window.requestIdleCallback || (f => setTimeout(f, 800)))(next);
 }
+async function setEra(e) {
+  if (!ERAS[e] || e === ERA) return;
+  ERA = e; store.set("sa2:era", e);
+  const token = ++loadToken;
+  try { await useSport(SPORT, token); } catch (err) { $("view").innerHTML = `<p class="loading">Couldn't load the ${ERAS[e].label} puzzles. Refresh the page to try again.</p>`; return; }
+  if (token !== loadToken) return;
+  viewSeq++; render(); prefetchSports();
+}
+function eraSwitch() {
+  return `<span class="era" role="group" aria-label="Era">${Object.entries(ERAS).map(([k, e]) =>
+    `<button type="button" data-era="${k}" class="${k === ERA ? "on" : ""}" aria-pressed="${k === ERA}" title="${e.tip}">${e.label}</button>`).join("")}</span>`;
+}
 async function useSport(k, token) {
-  let d = CACHE[k];
+  let d = CACHE[ek(k)];
   if (!d) {
     const v = $("view");
     if (D) v.classList.add("busy");                       // switching sports: keep the page where it is
@@ -1504,7 +1530,7 @@ async function useSport(k, token) {
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
   store.set("sa2:sport", k);
-  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
+  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
 }
 function render() {
   const root = $("view");
@@ -1513,7 +1539,9 @@ function render() {
     return `<a href="#${SPORT}${h ? "-" + h : ""}" ${current === (h || "home") ? 'aria-current="page"' : ""}>${ICON[ic]}<span>${h && GAMES[h].short ? `<span class="full">${l}</span><span class="short">${GAMES[h].short}</span>` : l}</span>${fin ? '<span class="done-dot" aria-label="finished"></span>' : ""}</a>`;
   }).join("");
   $("sportbar").innerHTML = sportTabs();
-  $("meta").innerHTML = `<strong>${LG()} · Day ${day.index + 1}</strong> · ${day.label}`;
+  $("meta").innerHTML = `<span><strong>${LG()} · Day ${day.index + 1}</strong> · ${day.label}</span>${eraSwitch()}`;
+  $("era-top").innerHTML = eraSwitch();                   // wide screens show the switch next to the icons instead (no room in the meta row)
+  document.querySelectorAll("#meta [data-era], #era-top [data-era]").forEach(b => b.addEventListener("click", () => setEra(b.dataset.era)));
   const g = GAMES[current];
   if (g) g.obj.render(root); else renderHome(root);
   tick();
@@ -1531,7 +1559,7 @@ async function route() {
   const token = ++loadToken;
   closeModal();
   try {
-    if (sport !== SPORT || !D) await useSport(sport, token);
+    if (sport !== SPORT || !D || D._era !== ERA) await useSport(sport, token);
   } catch (e) {
     $("view").innerHTML = `<p class="loading">Couldn't load the ${SPORTS[sport].label} puzzles. Refresh the page to try again.</p>`;
     return;
@@ -1561,6 +1589,9 @@ function start() {
   $("btn-settings").addEventListener("click", openSettings);
   $("btn-credits").addEventListener("click", openCredits);
   if (store.get("sa2:cb", false)) document.documentElement.classList.add("cb");
+  const qe = new URLSearchParams(location.search).get("era");
+  ERA = ERAS[qe] ? qe : (ERAS[store.get("sa2:era", "")] ? store.get("sa2:era", "") : "modern");
+  if (ERAS[qe]) store.set("sa2:era", qe);
   $("btn-help").addEventListener("click", openHelp);
   $("btn-stats").addEventListener("click", openStats);
   window.addEventListener("hashchange", route);

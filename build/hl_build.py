@@ -10,6 +10,9 @@ sys.path.insert(0, HERE)
 import common, sports
 
 DAYS = 365
+ERA = os.environ.get("SHOOTAROUND_ERA", "all")     # "modern": reads {sport}-modern.json, writes hl-{sport}-modern.json
+MODERN_FROM = 2010
+SUFFIX = "" if ERA == "all" else "-" + ERA
 def season_label(sport, y):
     return f"{y-1}–{str(y)[2:]}" if sport in ("nba", "nhl") else str(y)
 
@@ -162,10 +165,10 @@ SEASON_FN = {"nba": nba_seasons, "nhl": nhl_seasons, "mlb": mlb_seasons, "nfl": 
 
 # ---------------------------------------------------------------- build
 def build(sport, force=False):
-    out_path = os.path.join(OUT, f"hl-{sport}.json")
+    out_path = os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")
     if os.path.exists(out_path) and not force:
-        sys.exit(f"hl-{sport}.json already exists. Published puzzles are frozen; use --force only before launch.")
-    D = json.load(open(os.path.join(OUT, f"{sport}.json"), encoding="utf-8"))
+        sys.exit(f"hl-{sport}{SUFFIX}.json already exists. Published puzzles are frozen; use --force only before launch.")
+    D = json.load(open(os.path.join(OUT, f"{sport}{SUFFIX}.json"), encoding="utf-8"))
     pool = [p for p in D["players"] if p.get("s")]          # already sorted most-famous first
     rank = {p["n"]: i for i, p in enumerate(pool)}
     role_of = {p["n"]: (p.get("r") or "all") for p in pool}
@@ -176,6 +179,9 @@ def build(sport, force=False):
         b = rng.choices(group, weights=w)[0]
         return a, b
     seasons = SEASON_FN[sport]({p["n"] for p in top["season"]})
+    if ERA == "modern":                                    # season questions stay inside the era too
+        end_year = lambda lab: int(lab[:4]) + (1 if sport in ("nba", "nhl") else 0)
+        seasons = {n: [x for x in v if end_year(x[0]) >= MODERN_FROM] for n, v in seasons.items()}
     rng = random.Random(f"hl-{sport}")
     days, used = [], set()
     use_count = collections.Counter()
@@ -228,7 +234,7 @@ def build(sport, force=False):
             for side in ("a", "b"):
                 v = q[side]["v"]; q[side]["v"] = round(v, 4) if isinstance(v, float) else v
         days.append(qs)
-    json.dump({"sport": sport, "epoch": D["epoch"], "days": days}, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    json.dump({"sport": sport, "era": ERA, "epoch": D["epoch"], "days": days}, open(out_path, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     print(f"{sport}: {len(days)} days, {len(days)*5} questions, players with seasons {len(season_players)}, distinct players {len(use_count)}, max uses {max(use_count.values())}")
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import os as _e
+SUFFIX = "" if _e.environ.get("SHOOTAROUND_ERA", "all") == "all" else "-" + _e.environ["SHOOTAROUND_ERA"]
 import json, collections, sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -5,7 +7,7 @@ OUT = os.path.join(HERE, "..")
 import common, hl_build as H
 errs = []
 for sport in ["nba", "nfl", "nhl", "mlb"]:
-    D = json.load(open(os.path.join(OUT, f"{sport}.json"))); HL = json.load(open(os.path.join(OUT, f"hl-{sport}.json")))
+    D = json.load(open(os.path.join(OUT, f"{sport}{SUFFIX}.json"))); HL = json.load(open(os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")))
     S = {p["n"]: p for p in D["players"]}
     ncar = nsea = 0
     for d, day in enumerate(HL["days"]):
@@ -28,7 +30,7 @@ for r in common.rows("Player Per Game.csv"):
     if r["lg"] == "NBA":
         key = (r["player"], int(r["season"]))
         if r["team"] in common.MULTI or key not in pg: pg[key] = r
-HL = json.load(open(os.path.join(OUT, "hl-nba.json"))); checked = bad = 0
+HL = json.load(open(os.path.join(OUT, f"hl-nba{SUFFIX}.json"))); checked = bad = 0
 for day in HL["days"]:
     q = day[4]
     if q["s"] != "Points per game": continue
@@ -42,5 +44,5 @@ print(f"NBA season PPG cross-checked: {checked}, mismatches {bad}")
 print("ERRORS:", len(errs), errs[:8])
 for sport in ["nba", "mlb"]:
     print(f"\n{sport.upper()} day 1:")
-    for i, q in enumerate(json.load(open(os.path.join(OUT, f"hl-{sport}.json")))["days"][0]):
+    for i, q in enumerate(json.load(open(os.path.join(OUT, f"hl-{sport}{SUFFIX}.json")))["days"][0]):
         print(f"  Q{i+1} {q['s']}: {q['a']['n']} ({q['a']['c']}) = {H.fmt(q['f'], q['a']['v'])}  vs  {q['b']['n']} ({q['b']['c']}) = {H.fmt(q['f'], q['b']['v'])}")

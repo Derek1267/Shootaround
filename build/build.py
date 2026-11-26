@@ -2,16 +2,22 @@ import os as _os
 HERE = _os.path.dirname(_os.path.abspath(__file__))
 RAW = _os.environ.get("SHOOTAROUND_RAW", _os.path.join(HERE, "..", "raw-data"))
 OUT = _os.path.join(HERE, "..")
+ERA = _os.environ.get("SHOOTAROUND_ERA", "all")   # "modern": only players whose careers centre on 2010 or later (career midpoint >= 2010) -> nba-modern.json
+MODERN_FROM = 2010
+FILE = "nba.json" if ERA == "all" else f"nba-{ERA}.json"
 """Build nba.json for Shootaround: guess pool, 365 Journeyman days, 365 Stat Line days, 365 Knecht 4 days."""
 import json, random, datetime
 from common import load, per_game, nickname, city
 from knecht import generate as gen_knecht
 import sys as _sys0
-if _os.path.exists(_os.path.join(OUT, "nba.json")) and "--force" not in _sys0.argv:
-    _sys0.exit("nba.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
+if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys0.argv:
+    _sys0.exit(f"{FILE} already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
                "Only use --force before launch, or to start a brand-new schedule on purpose.")
 
 P = load()
+P_ALL = P                                         # names shared by two players anywhere in history stay out, in every era
+if ERA == "modern":
+    P = {k: v for k, v in P.items() if (v["from"] + v["to"]) / 2 >= MODERN_FROM}
 EPOCH = datetime.date(2026, 11, 22)
 DAYS = 365
 
@@ -59,10 +65,11 @@ def schedule(pool, rng):
 rng = random.Random(20261122)
 
 # ---------- guess pool (everyone guessable in Journeyman and Stat Line)
-pool_players = [p for p in P.values() if p["from"] >= 1980 and per_game(p)["g"] >= 250]
+MIN_POOL_G = 150 if ERA == "modern" else 250   # the modern pool is smaller, so let shorter careers in
+pool_players = [p for p in P.values() if p["from"] >= 1980 and per_game(p)["g"] >= MIN_POOL_G]
 pool_players.sort(key=fame, reverse=True)
 import collections
-DUP = {n for n, k in collections.Counter(p["name"] for p in P.values() if p["from"] >= 1980).items() if k > 1}
+DUP = {n for n, k in collections.Counter(p["name"] for p in P_ALL.values() if p["from"] >= 1980).items() if k > 1}
 pool_players = [p for p in pool_players if p["name"] not in DUP]
 players_out = []
 for p in pool_players:
@@ -83,7 +90,7 @@ sl_out = [{
 } for i, p in enumerate(sl_days)]
 
 # ---------- Journeyman answers (retired, 3+ stints, unambiguous trade order)
-jm_pool = [p for p in sl_pool if len(p["path"]) >= 3 and not p["ambiguous"]]
+jm_pool = [p for p in (pool_players if ERA == "modern" else sl_pool) if len(p["path"]) >= 3 and not p["ambiguous"]]
 jm_days = schedule(jm_pool[:DAYS], rng)
 jm_out = [{
     "n": p["name"], "lvl": day_levels[i],
@@ -97,14 +104,14 @@ jm_out = [{
 k4_out, k4_report = gen_knecht(P, fame, day_levels, DAYS, sizes=(240, 400, 580))
 
 data = {
-    "sport": "nba", "built": datetime.date.today().isoformat(), "epoch": EPOCH.isoformat(),
+    "sport": "nba", "era": ERA, "built": datetime.date.today().isoformat(), "epoch": EPOCH.isoformat(),
     "levels": LEVEL_NAME, "players": players_out, "journeyman": jm_out, "statline": sl_out, "knecht": k4_out,
 }
 import sys as _sys
-if _os.path.exists(_os.path.join(OUT, "nba.json")) and "--force" not in _sys.argv:
-    _sys.exit("nba.json already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
+if _os.path.exists(_os.path.join(OUT, FILE)) and "--force" not in _sys.argv:
+    _sys.exit(f"{FILE} already exists. Published puzzles are frozen: rebuilding would change every player's puzzles.\n"
               "Only use --force before launch, or to start a brand-new schedule on purpose.")
-with open(_os.path.join(OUT, "nba.json"), "w", encoding="utf-8") as f:
+with open(_os.path.join(OUT, FILE), "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
 print("players", len(players_out), "jm", len(jm_out), "sl", len(sl_out), "k4", len(k4_out))
 print(k4_report)
