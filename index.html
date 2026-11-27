@@ -1144,12 +1144,16 @@ const sl = {
   role() { return this.st.ans.r || "all"; },
   rs() { return spec().roles[this.role()]; },
   stats(name) { return PLAYERS.get(name).s; },
-  names() { const r = this.role(); return r === "all" ? NAMES : NAMES.filter(n => (PLAYERS.get(n).r || "all") === r); },
+  // When every role shows the same stats (soccer), the role is a secret: no label, and any player can be guessed.
+  // When roles show different stats (a QB's line vs a receiver's), the card already gives the role away, so guesses stay within it.
+  sharedRoles() { const r = Object.values(spec().roles).map(x => x.cols.map(c => c.k).join()); return r.every(k => k === r[0]); },
+  roleShown() { return this.role() !== "all" && !this.sharedRoles(); },
+  names() { const r = this.role(); return !this.roleShown() ? NAMES : NAMES.filter(n => (PLAYERS.get(n).r || "all") === r); },
   guess(raw) {
     const st = this.st; if (st.done) return;
     const pool = this.names();
     const m = raw === SKIP ? { n: SKIP } : pool.includes(raw) ? PLAYERS.get(raw) : pool.map(n => PLAYERS.get(n)).find(p => norm(p.n) === norm(raw));
-    if (!m) { $("msg").textContent = `Pick a ${this.rs().label ? this.rs().label.toLowerCase() : "player"} from the list.`; return; }
+    if (!m) { $("msg").textContent = `Pick a ${this.roleShown() && this.rs().label ? this.rs().label.toLowerCase() : "player"} from the list.`; return; }
     if (m.n !== SKIP && st.guesses.includes(m.n)) { $("msg").textContent = `You already guessed ${m.n}.`; return; }
     st.guesses.push(m.n); this.fresh = st.guesses.length - 1;
     if (m.n === st.ans.n) { st.done = true; st.won = true; } else if (st.guesses.length >= SL_MAX) st.done = true;
@@ -1181,14 +1185,29 @@ const sl = {
         return `<li><span>${i + 1}. ${esc(g)}</span><span>${hero.map(c => FMT[c.f](s[c.k]) + " " + c.l.toLowerCase()).join(" · ")}</span></li>`;
       }).join("")}</ul>` };
   },
+  // Clues never repeat what the card already says: soccer's card shows caps (so its clue is foot and height instead),
+  // and when the card names the role, a Position clue that only repeats it ("Quarterback", "Pitcher") becomes the number of teams.
+  clues() {
+    let list = spec().sl_hints.map(h => ({ ...h, wide: false }));
+    const shownKeys = new Set([...this.rs().hero, ...this.rs().row].map(c => c.k));
+    if (SPORT === "soccer" && shownKeys.has("caps")) list = list.map(h => h.key === "caps" ? { key: "foot", label: "Foot · Height" } : h);
+    if (this.posRepeatsRole()) list = list.map(h => h.key === "pos" ? { key: "teams", label: "Teams played for" } : h);
+    return [...list, { key: "initials", label: "Initials" }];
+  },
+  posRepeatsRole() {
+    if (!this.roleShown()) return false;
+    const pos = (this.st.ans.h.pos || "").toLowerCase(), lab = (this.rs().label || "").toLowerCase();
+    return !!pos && lab.split(/\s*\/\s*/).some(w => w === pos);
+  },
   hintValues() {
-    const h = { ...this.st.ans.h, initials: initials(this.st.ans.n) };
+    const nt = (PLAYERS.get(this.st.ans.n).t || []).length;
+    const h = { ...this.st.ans.h, initials: initials(this.st.ans.n), teams: `${nt} team${nt === 1 ? "" : "s"}` };
     if (D.spec) return h;
     return { ...h, honors: `${h.as} All-Star · ${h.rings} title${h.rings === "1" ? "" : "s"}` };
   },
   render(root) {
     if (!this.st) this.loadDaily();
-    const st = this.st, a = st.ans, s = this.stats(a.n), R = this.rs(), hints = [...spec().sl_hints.map(h => ({ ...h, wide: false })), { key: "initials", label: "Initials" }];
+    const st = this.st, a = st.ans, s = this.stats(a.n), R = this.rs(), hints = this.clues();
     const wrong = st.guesses.filter(g => g !== a.n).length;
     const shown = openClues(wrong, hints.length, st.done);
     const rows = Array.from({ length: SL_MAX }, (_, i) => {
@@ -1205,8 +1224,8 @@ const sl = {
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card">
         <div class="title-row"><h2 class="game-title" style="color:var(--g-sl)">Stat Line</h2>
-          <div class="badges">${R.label ? `<span class="badge">${esc(R.label)}</span>` : ""}${st.mode === "practice" ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div></div>
-        <p class="prompt">Whose <b>${SPORT === "soccer" ? "league numbers" : "career numbers"}</b> are these?${R.label ? ` This one is a ${R.label.toLowerCase()}.` : ""}</p>
+          <div class="badges">${this.roleShown() && R.label ? `<span class="badge">${esc(R.label)}</span>` : ""}${st.mode === "practice" ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div></div>
+        <p class="prompt">Whose <b>${SPORT === "soccer" ? "league numbers" : "career numbers"}</b> are these?${this.roleShown() && R.label ? ` This one is a ${R.label.toLowerCase()}.` : ""}</p>
         <div class="boxline">${R.hero.map(c => `<div><b>${FMT[c.f](s[c.k])}</b><span>${c.l}</span></div>`).join("")}</div>
         <div class="boxline2" style="grid-template-columns:repeat(${Math.min(R.row.length, 7)},1fr)">${R.row.map(c => `<div><b>${FMT[c.f](s[c.k])}</b><span>${c.l}</span></div>`).join("")}</div>
         <p class="boxline-cap">${SPORTS[SPORT].cap}</p>

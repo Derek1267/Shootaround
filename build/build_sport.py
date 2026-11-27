@@ -148,7 +148,7 @@ def hints(sport, cfg, p):
 
 HINT_SPECS = {
     "soccer": {"jm": [("born","Born"),("pos","Position"),("nat","Nationality"),("foot","Foot · Height"),("caps","International caps"),("initials","Initials")],
-               "sl": [("born","Born"),("pos","Position"),("nat","Nationality"),("leagues","Big leagues played in"),("caps","International caps")]},
+               "sl": [("born","Born"),("pos","Position"),("nat","Nationality"),("leagues","Big leagues played in"),("foot","Foot · Height")]},   # caps are on the Stat Line card already
     "nfl": {"jm": [("seasons","Seasons"),("pos","Position"),("draft","Draft"),("origin","College"),("initials","Initials")],
             "sl": [("seasons","Career"),("pos","Position"),("honors","Pro Bowls · All-Pro"),("draft","Draft"),("origin","College")]},
     "nhl": {"jm": [("seasons","Seasons"),("pos","Position"),("draft","Draft"),("origin","Birthplace"),("initials","Initials")],
