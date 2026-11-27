@@ -19,10 +19,10 @@
 
 ## The games
 
-- 🧭 **Journeyman:** see every team a player suited up for, in order, and name him in 6 guesses.
-- 🟪 **Links:** sort 16 players into 4 hidden groups of 4.
-- 📊 **Stat Line:** name the player from his career numbers.
-- ↕️ **Higher or Lower:** five quick calls on who has the bigger number.
+- 🧭 **Journey:** see every team a player suited up for, in order, and name him in 6 guesses.
+- 🟪 **Quads:** sort 16 players into 4 hidden groups of 4.
+- 📊 **Digits:** name the player from his career numbers.
+- ↕️ **Flip:** five quick calls on who has the bigger number.
 
 Each sport has its own set of all four games, its own streaks, an archive of past days and a spoiler-free result to share.
 

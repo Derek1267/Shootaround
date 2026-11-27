@@ -28,8 +28,8 @@ python3 -m http.server 8000
 | File | What it is |
 |---|---|
 | `index.html` | The whole site: layout, styles and game logic |
-| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json`, `soccer.json` | 365 days of Journeyman, Links and Stat Line per sport, plus the player lists for guessing |
-| `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json`, `hl-soccer.json` | 365 days of Higher or Lower per sport (5 questions a day) |
+| `nba.json`, `nfl.json`, `nhl.json`, `mlb.json`, `soccer.json` | 500 days of Journey, Quads and Digits per sport, plus the player lists for guessing |
+| `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json`, `hl-soccer.json` | 500 days of Flip per sport (5 questions a day) |
 | `*-modern.json` | The same four kinds of file for the Modern era |
 | `logo.svg` | The logo, also used as the browser tab icon |
 | `og.png` | Preview image for shared links |
@@ -47,9 +47,9 @@ Day 1 is **22 November 2026**. Each day's puzzles are stored in the JSON files, 
 pip install -r build/requirements.txt
 cd build
 bash get_data.sh                     # downloads raw data into ../raw-data (~300 MB)
-python3 build.py --force             # NBA: Journeyman, Links, Stat Line (~10 min)
+python3 build.py --force             # NBA: Journey, Quads, Digits (~10 min)
 python3 build_sport.py nfl nhl mlb soccer --force
-python3 hl_build.py nba nfl nhl mlb soccer --force   # Higher or Lower
+python3 hl_build.py nba nfl nhl mlb soccer --force   # Flip
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
 ```
 
@@ -77,21 +77,21 @@ python3 verify.py && python3 verify_sport.py nfl nhl mlb soccer && python3 verif
 ```
 
 The checkers make sure that:
-- every Links player really fits their group, and each grid has exactly one solution;
+- every Quads player really fits their group, and each grid has exactly one solution;
 - no group repeats;
-- Journeyman routes match the data;
-- Higher or Lower values match the career and season numbers, with no ties.
+- Journey routes match the data;
+- Flip values match the career and season numbers, with no ties.
 
 ## How the puzzles are made
 
 Every puzzle is generated from real data rather than written by hand:
 - Players are ranked by a fame score (All-Star or Pro Bowl picks, awards, career totals, Hall of Fame), weighted toward recent careers.
 - Early-week puzzles use the best-known players, and later days dig deeper.
-- Links grids are built from categories like teams, colleges, draft picks, awards, milestones, birthplaces, heights and names. A solver then checks that only one grouping works, and rejects grids where an unintended fifth group sneaks in.
+- Quads grids are built from categories like teams, colleges, draft picks, awards, milestones, birthplaces, heights and names. A solver then checks that only one grouping works, and rejects grids where an unintended fifth group sneaks in.
 
 ## Known limits
 
-- Soccer league numbers start in 2012–13, where the Transfermarkt dataset starts, so soccer has one puzzle set instead of Modern and All-time. Career paths come from transfer records and include loan spells; players whose transfer history has gaps are kept out of Journeyman.
+- Soccer league numbers start in 2012–13, where the Transfermarkt dataset starts, so soccer has one puzzle set instead of Modern and All-time. Career paths come from transfer records and include loan spells; players whose transfer history has gaps are kept out of Journey.
 
 - NFL covers drafted players since 1980, so undrafted players (for example Kurt Warner or Tony Romo) aren't included.
 - NHL covers skaters only (no goalies) and has no award-based groups.

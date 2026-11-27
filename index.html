@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shootaround</title>
-<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL, MLB and soccer fans: Journeyman, Links, Stat Line and Higher or Lower.">
+<meta name="description" content="Four quick daily sports puzzles for NBA, NFL, NHL, MLB and soccer fans: Journey, Quads, Digits and Flip.">
 <meta property="og:title" content="Shootaround: daily sports puzzles">
-<meta property="og:description" content="Journeyman, Links, Stat Line and Higher or Lower. New NBA, NFL, NHL, MLB and soccer puzzles every day.">
+<meta property="og:description" content="Journey, Quads, Digits and Flip. New NBA, NFL, NHL, MLB and soccer puzzles every day.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://derek1267.github.io/Shootaround/">
 <meta property="og:image" content="https://derek1267.github.io/Shootaround/og.png">
@@ -125,7 +125,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .msg { min-height: 20px; font-size: 14px; color: var(--accent); margin: 6px 2px 0; }
 .foot-note { font-size: 13px; color: var(--muted); margin: 0; }
 [hidden] { display: none !important; }
-/* ---- Higher or Lower */
+/* ---- Flip */
 .short { display: none; }
 @media (max-width: 560px) { nav .full { display: none; } nav .short { display: inline; } }
 .hl-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 6px 0 14px; }
@@ -225,7 +225,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .status.live { border-color: var(--gc); color: var(--gc); }
 .ticket:hover h2 { color: var(--gc); }
 
-/* Journeyman route */
+/* Journey route */
 .route { list-style: none; margin: 0; padding: 0; position: relative; }
 .route::before { content: ""; position: absolute; left: 11px; top: 16px; bottom: 16px; width: 4px; background: var(--ink); border-radius: 2px; opacity: .85; }
 .stop { position: relative; display: grid; grid-template-columns: 22px 1fr; align-items: center; column-gap: 10px; padding: 6px 0 6px 40px; animation: rise .45s ease-out both; animation-delay: calc(var(--i) * 90ms); }
@@ -299,7 +299,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 @keyframes flip { from { transform: rotateX(90deg); } to { transform: none; } }
 @keyframes pop { 0% { transform: scale(.97); } 60% { transform: scale(1.02); } 100% { transform: none; } }
 
-/* Stat Line hero */
+/* Digits hero */
 .boxline { display: grid; grid-template-columns: repeat(3, 1fr); border: 2px solid var(--ink); border-radius: 10px 10px 0 0; overflow: hidden; }
 .boxline div { text-align: center; padding: 12px 6px 10px; }
 .boxline div + div { border-left: 2px solid var(--ink); }
@@ -311,7 +311,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .boxline2 b { display: block; font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
 .boxline-cap { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
-/* Links */
+/* Quads */
 .solved { display: flex; flex-direction: column; gap: 8px; }
 .solved:not(:empty) { margin-bottom: 8px; }
 .group { border-radius: 10px; padding: 10px 12px; text-align: center; color: #170f24; min-height: 72px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
@@ -437,7 +437,12 @@ header nav#nav a.crumb.next .ico { transform: rotate(180deg); }
 @media (max-width: 959px) { .topbar .wordmark { font-size: clamp(22px, calc((100vw - 226px) / 6.1), 60px) !important; } }
 @media (max-width: 380px) { .topbar .iconbtn { width: 32px; height: 32px; } .topbar .tools { gap: 3px; } .topbar .iconbtn .ico { width: 16px; height: 16px; }
   .topbar .wordmark { font-size: clamp(20px, calc((100vw - 185px) / 6.1), 40px) !important; } }
-@media (max-width: 380px) { .tile { font-size: 11px; letter-spacing: 0; overflow-wrap: break-word; padding: 6px 2px; } }
+/* phones: Quads tiles become wide rectangles, two across, so long names fit without breaking out of the tile */
+@media (max-width: 560px) {
+  #k-card .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+  #k-card .tile { min-height: 50px; padding: 8px 10px; font-size: 13px; letter-spacing: .01em; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+}
+@media (max-width: 360px) { #k-card .tile { font-size: 12px; padding: 7px 6px; } }
 </style>
 </head>
 <body>
@@ -683,7 +688,7 @@ const ICON = {
   soccer: SVG('<circle cx="12" cy="12" r="9"/><path d="M12 8.2l3.6 2.6-1.4 4.2H9.8l-1.4-4.2zM12 8.2V3.4M15.6 10.8l4.4-1.4M14.2 15l2.7 3.8M9.8 15l-2.7 3.8M8.4 10.8L4 9.4"/>'),
 };
 const SPORT_EMOJI = { nba: "🏀", nfl: "🏈", nhl: "🏒", mlb: "⚾", soccer: "⚽" };
-const GAME_ICON = { journeyman: "route", "links": "grid", "stat-line": "bars", "higher-lower": "updown" };
+const GAME_ICON = { journey: "route", quads: "grid", digits: "bars", flip: "updown" };
 
 /* Old names -> today's franchise. Keys are "Nickname" or "Nickname|City" when the nickname alone is ambiguous. */
 const RENAMES = {
@@ -793,11 +798,11 @@ const jm = {
     if (m.n === st.puzzle.n) { st.done = true; st.won = true; } else if (st.guesses.length >= JM_MAX) st.done = true;
     if (st.done && st.mode === "daily") recordStats("journeyman", st.won);
     this.save(); render(); this.fresh = -1;
-    if (st.done) setTimeout(() => openModal("journeyman", this, true), reduced() ? 0 : 500); else $("guess").focus();
+    if (st.done) setTimeout(() => openModal("journey", this, true), reduced() ? 0 : 500); else $("guess").focus();
   },
   share() {
     const st = this.st, sq = st.guesses.map(g => ({ hit: "🟩", near: "🟨", miss: "⬛", skip: "⬜" })[this.feedback(g).kind]).join("");
-    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Journeyman (practice)` : `Shootaround ${LGE()} · Journeyman #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Journey (practice)` : `Shootaround ${LGE()} · Journey #${st.idx + 1}`;
     return `${head}\n${SPORT_EMOJI[SPORT] || "🏀"} ${st.won ? st.guesses.length : "X"}/${JM_MAX}  ${sq}`;
   },
   result() {
@@ -827,7 +832,7 @@ const jm = {
     const clues = cluePanel(jmHints(), { ...p.h, initials: initials(p.n) }, shown);
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card">
-        <div class="title-row"><h2 class="game-title" style="color:var(--g-jm)">Journeyman</h2>${badge(p.lvl, st.mode === "practice")}</div>
+        <div class="title-row"><h2 class="game-title" style="color:var(--g-jm)">Journey</h2>${badge(p.lvl, st.mode === "practice")}</div>
         <p class="prompt">Name the ${SPORT === "soccer" ? "soccer" : LG()} player who made these <b>${stopsOf(p).length} stops</b>, in order.${SPORT === "soccer" ? " Loan spells count as stops." : ""}</p>
         <ol class="route">${route}</ol>
       </section>
@@ -843,7 +848,7 @@ const jm = {
       root.querySelector("form").addEventListener("submit", e => { e.preventDefault(); this.guess(pick() || $("guess").value.trim()); });
       $("skip").addEventListener("click", () => this.guess(SKIP));
     }
-    wireResult(root, "journeyman", this);
+    wireResult(root, "journey", this);
   }
 };
 
@@ -977,7 +982,7 @@ const k4 = {
     const st = this.st;
     if (st.done && st.mode === "daily") recordStats("knecht", st.won);
     this.save(); this.busy = false; render(); this.landed = -1;
-    if (st.done) setTimeout(() => openModal("links", this, true), reduced() ? 0 : 500);
+    if (st.done) setTimeout(() => openModal("quads", this, true), reduced() ? 0 : 500);
   },
   hint() {
     const st = this.st; if (st.hints >= K4_HINTS || st.done) return;
@@ -1011,7 +1016,7 @@ const k4 = {
   },
   share() {
     const st = this.st;
-    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Links (practice)` : `Shootaround ${LGE()} · Links #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Quads (practice)` : `Shootaround ${LGE()} · Quads #${st.idx + 1}`;
     return `${head}${st.hints ? `  💡${st.hints}` : ""}\n${st.history.map(r => r.map(t => TIER_EMOJI[t]).join("")).join("\n")}`;
   },
   result() {
@@ -1033,7 +1038,7 @@ const k4 = {
     const pips = Array.from({ length: K4_MISTAKES }, (_, i) => `<span class="pip ${i < st.mistakes ? "used" : ""}"></span>`).join("");
     root.innerHTML = `<div class="layout k4"><div class="main">
       <section class="card" id="k-card">
-        <div class="title-row"><h2 class="game-title" style="color:var(--g-k4)">Links</h2>${badge(puz.lvl, st.mode === "practice")}</div>
+        <div class="title-row"><h2 class="game-title" style="color:var(--g-k4)">Quads</h2>${badge(puz.lvl, st.mode === "practice")}</div>
         <p class="prompt">Find <b>four groups of four</b> players who share something.</p>
         <div class="solved">${solved}</div>
         ${st.done ? "" : `<div class="grid">${tiles}</div>
@@ -1089,7 +1094,7 @@ const k4 = {
       $("k-hint2").addEventListener("click", () => this.hint());
       $("k-submit").addEventListener("click", () => this.submit());
     }
-    wireResult(root, "links", this);
+    wireResult(root, "quads", this);
   }
 };
 function shuffle(arr, seed) {
@@ -1159,7 +1164,7 @@ const sl = {
     if (m.n === st.ans.n) { st.done = true; st.won = true; } else if (st.guesses.length >= SL_MAX) st.done = true;
     if (st.done && st.mode === "daily") recordStats("statline", st.won);
     this.save(); render(); this.fresh = -1;
-    if (st.done) setTimeout(() => openModal("stat-line", this, true), reduced() ? 0 : 900); else $("guess").focus();
+    if (st.done) setTimeout(() => openModal("digits", this, true), reduced() ? 0 : 900); else $("guess").focus();
   },
   cell(g, c) {
     const a = this.stats(this.st.ans.n)[c.k], v = g[c.k];
@@ -1170,7 +1175,7 @@ const sl = {
   },
   share() {
     const st = this.st, cols = this.rs().cols;
-    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Stat Line (practice)` : `Shootaround ${LGE()} · Stat Line #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Digits (practice)` : `Shootaround ${LGE()} · Digits #${st.idx + 1}`;
     const lines = st.guesses.map(n => n === SKIP ? "⬜".repeat(cols.length) : n === st.ans.n ? "🟩".repeat(cols.length) : cols.map(c => ({ hit: "🟩", near: "🟨", miss: "⬛" })[this.cell(this.stats(n), c).kind]).join(""));
     return `${head}  ${st.won ? st.guesses.length : "X"}/${SL_MAX}\n${lines.join("\n")}`;
   },
@@ -1223,7 +1228,7 @@ const sl = {
     }).join("");
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card">
-        <div class="title-row"><h2 class="game-title" style="color:var(--g-sl)">Stat Line</h2>
+        <div class="title-row"><h2 class="game-title" style="color:var(--g-sl)">Digits</h2>
           <div class="badges">${this.roleShown() && R.label ? `<span class="badge">${esc(R.label)}</span>` : ""}${st.mode === "practice" ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div></div>
         <p class="prompt">Whose <b>${SPORT === "soccer" ? "league numbers" : "career numbers"}</b> are these?${this.roleShown() && R.label ? ` This one is a ${R.label.toLowerCase()}.` : ""}</p>
         <div class="boxline">${R.hero.map(c => `<div><b>${FMT[c.f](s[c.k])}</b><span>${c.l}</span></div>`).join("")}</div>
@@ -1241,7 +1246,7 @@ const sl = {
       root.querySelector("form").addEventListener("submit", e => { e.preventDefault(); this.guess(pick() || $("guess").value.trim()); });
       $("skip").addEventListener("click", () => this.guess(SKIP));
     }
-    wireResult(root, "stat-line", this);
+    wireResult(root, "digits", this);
   }
 };
 
@@ -1291,12 +1296,12 @@ const hl = {
     }
     if (st.picks.length >= HL_N) { st.done = true; st.won = this.score() >= 3; if (st.mode === "daily") recordStats("hl", st.won); }
     this.save(); this.busy = false; render();
-    if (st.done) setTimeout(() => openModal("higher-lower", this, this.score() >= 3), reduced() ? 0 : 900);
+    if (st.done) setTimeout(() => openModal("flip", this, this.score() >= 3), reduced() ? 0 : 900);
   },
   next() { if (this.st.picks.length < HL_N) { this.st.view = this.st.picks.length; render(); } },
   share() {
     const st = this.st;
-    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Higher or Lower (practice)` : `Shootaround ${LGE()} · Higher or Lower #${st.idx + 1}`;
+    const head = st.mode === "practice" ? `Shootaround ${LGE()} · Flip (practice)` : `Shootaround ${LGE()} · Flip #${st.idx + 1}`;
     return `${head}\n${this.score()}/${HL_N}  ${st.picks.map((p, i) => this.right(i) ? "🟩" : "🟥").join("")}`;
   },
   result() {
@@ -1326,7 +1331,7 @@ const hl = {
     }).join("");
     root.innerHTML = `<div class="layout"><div class="main">
       <section class="card" id="hl-card">
-        <div class="title-row"><h2 class="game-title" style="color:var(--g-hl)">Higher or Lower</h2>
+        <div class="title-row"><h2 class="game-title" style="color:var(--g-hl)">Flip</h2>
           <div class="badges">${st.mode === "practice" ? '<span class="badge pr">Practice</span>' : ""}${archBadge()}</div></div>
         <div class="hl-top"><div class="hl-pips">${pips}</div><span class="hl-level">Question ${showIdx + 1} of ${HL_N} · ${level}</span></div>
         <h3 class="hl-stat">${esc(Q.s)}</h3>
@@ -1353,26 +1358,26 @@ const hl = {
       </aside></div>`;
     root.querySelectorAll(".hl-btn").forEach(b => b.addEventListener("click", () => this.answer(b.dataset.pick)));
     const nx = $("hl-next"); if (nx) { nx.addEventListener("click", () => this.next()); }
-    wireResult(root, "higher-lower", this);
+    wireResult(root, "flip", this);
   }
 };
 document.addEventListener("keydown", e => {
-  if ($("modal-root").innerHTML || current !== "higher-lower" || !hl.st || (e.target.closest && e.target.closest("input, textarea"))) return;
+  if ($("modal-root").innerHTML || current !== "flip" || !hl.st || (e.target.closest && e.target.closest("input, textarea"))) return;
   if (e.key === "ArrowUp" || e.key.toLowerCase() === "h") { const b = document.querySelector('.hl-btn[data-pick="higher"]'); if (b) { e.preventDefault(); hl.answer("higher"); } }
   if (e.key === "ArrowDown" || e.key.toLowerCase() === "l") { const b = document.querySelector('.hl-btn[data-pick="lower"]'); if (b) { e.preventDefault(); hl.answer("lower"); } }
   if (e.key === "Enter" && $("hl-next") && !e.target.closest("button")) { e.preventDefault(); hl.next(); }
 });
 
 /* =====================================================================
-   HUB: sports, routing (#nba, #nfl-journeyman, …), home
+   HUB: sports, routing (#nba, #nfl-journey, …), home
    ===================================================================== */
 const GAMES = {
-  journeyman: { title: "Journeyman", blurb: "Name the player from the teams they played for.", color: "var(--g-jm)", obj: jm },
-  "links": { title: "Links", blurb: "Find the four hidden links between 16 players.", color: "var(--g-k4)", obj: k4 },
-  "stat-line": { title: "Stat Line", blurb: "Name the player from their career numbers.", color: "var(--g-sl)", obj: sl },
-  "higher-lower": { title: "Higher or Lower", short: "Hi-Lo", blurb: "Five quick calls on career and season stats.", color: "var(--g-hl)", obj: hl }
+  journey: { title: "Journey", blurb: "Name the player from the teams they played for.", color: "var(--g-jm)", obj: jm },
+  quads: { title: "Quads", blurb: "Sort 16 players into four groups of four.", color: "var(--g-k4)", obj: k4 },
+  digits: { title: "Digits", blurb: "Name the player from their career numbers.", color: "var(--g-sl)", obj: sl },
+  flip: { title: "Flip", blurb: "Five quick calls on career and season stats.", color: "var(--g-hl)", obj: hl }
 };
-const GAME_ORDER = ["journeyman", "links", "stat-line", "higher-lower"];
+const GAME_ORDER = ["journey", "quads", "digits", "flip"];
 let NAMES = [];
 
 function gameStatus(g) {
@@ -1380,12 +1385,12 @@ function gameStatus(g) {
   if (!s) return { kind: "todo", text: "Play" };
   if (!s.done) return { kind: "live", text: "In progress" };
   if (!s.won) return { kind: "lost", text: "Missed" };
-  if (g === "higher-lower") return { kind: s.won ? "won" : "lost", text: `${s.score}/5 right` };
-  if (g === "links") return { kind: "won", text: s.mistakes ? `Solved · ${s.mistakes} miss${s.mistakes === 1 ? "" : "es"}` : "Perfect" };
+  if (g === "flip") return { kind: s.won ? "won" : "lost", text: `${s.score}/5 right` };
+  if (g === "quads") return { kind: "won", text: s.mistakes ? `Solved · ${s.mistakes} miss${s.mistakes === 1 ? "" : "es"}` : "Perfect" };
   return { kind: "won", text: `Solved in ${s.guesses.length}` };
 }
 function todayLevel(g) {
-  const list = g === "journeyman" ? D.journeyman : g === "links" ? D.knecht : D.statline;
+  const list = g === "journey" ? D.journeyman : g === "quads" ? D.knecht : D.statline;
   return list[dailyIndex(list.length)].lvl;
 }
 function sportTabs() {
@@ -1429,23 +1434,23 @@ function openSheet(title, html) {
   $("m-close").focus();
 }
 const HELP = {
-  journeyman: () => `<h2>${ICON.route} Journeyman</h2><div class="how"><ul>
+  journey: () => `<h2>${ICON.route} Journey</h2><div class="how"><ul>
     <li>The route shows every ${LG()} team the player played for, in order. You get ${JM_MAX} guesses.</li>
     <li>Start typing a name and pick from the list. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li><span class="legend" style="background:var(--near)"></span>Your guess shared a team with the answer. <span class="legend" style="background:var(--miss);margin-left:8px"></span>No shared teams.</li>
     <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
-  "links": () => `<h2>${ICON.grid} Links</h2><div class="how"><ul>
+  "quads": () => `<h2>${ICON.grid} Quads</h2><div class="how"><ul>
     <li>Find four groups of four players who share something. Tap four, then Submit.</li>
     <li>You can make ${K4_MISTAKES} mistakes. "One away" means three of your four belong together.</li>
     <li>${ICON.bulb} Hints: the first shows what kind of link each group has; the next two name the easiest groups. Hints show in your shared result.</li>
     <li>Colours go from easiest to trickiest: <span class="legend" style="background:var(--t0)"></span><span class="legend" style="background:var(--t1)"></span><span class="legend" style="background:var(--t2)"></span><span class="legend" style="background:var(--t3)"></span> Every player belongs to exactly one group, and each link fits exactly four players on the board.</li>
     <li>Keyboard: <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li></ul></div>`,
-  "higher-lower": () => `<h2>${ICON.updown} Higher or Lower</h2><div class="how"><ul>
+  "flip": () => `<h2>${ICON.updown} Flip</h2><div class="how"><ul>
     <li>Five questions. Each one shows a stat for one player, then asks if a second player's number is higher or lower.</li>
     <li>Questions 1 and 2 are warm-ups, 3 and 4 use deeper stats, and question 5 is about one specific season.</li>
     <li>Get 3 or more right to keep your streak going.</li>
     <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li></ul></div>`,
-  "stat-line": () => `<h2>${ICON.bars} Stat Line</h2><div class="how"><ul>
+  "digits": () => `<h2>${ICON.bars} Digits</h2><div class="how"><ul>
     <li>Name the player from their career numbers. You get ${SL_MAX} guesses. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li>Each guess shows that player's numbers next to the answer's: an arrow says if the answer is higher ↑ or lower ↓.</li>
     <li><span class="legend" style="background:var(--good)"></span>Exact. <span class="legend" style="background:var(--near);margin-left:8px"></span>Close.</li>
@@ -1454,7 +1459,7 @@ const HELP = {
 function openHelp() {
   const g = GAMES[current];
   const body = g ? HELP[current]() : `<h2>How it works</h2><div class="how"><ul>
-      <li>Every day there are four new puzzles for each sport: ${ICON.route} Journeyman, ${ICON.grid} Links, ${ICON.bars} Stat Line and ${ICON.updown} Higher or Lower.</li>
+      <li>Every day there are four new puzzles for each sport: ${ICON.route} Journey, ${ICON.grid} Quads, ${ICON.bars} Digits and ${ICON.updown} Flip.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
       <li><b>Modern</b> or <b>All-time</b>: Modern uses players from the 2010s and 2020s; All-time goes back to 1980. Each has its own daily puzzles and streaks.</li>
       <li>Each game has one practice round for warming up: a medium puzzle, separate from the daily ones. You can redo it as often as you like, and it doesn't touch your stats.</li>
@@ -1472,18 +1477,18 @@ function openStats(sel) {
   openSheet("Your stats", `<h2>${ICON.stats} Your stats <span class="muted" style="font-size:.6em">${ERAS[ERA].label}</span></h2>
     <div class="sports stat-tabs" role="group" aria-label="Sport">${tabs}</div>
     <table class="stat-table"><thead><tr><th>Game</th><th>Played</th><th>Win</th><th>Streak</th><th>Best</th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="foot-note" style="margin-top:12px">A win means solving the puzzle (3 or more right in Higher or Lower). Stats are saved in this browser only.</p>`);
+    <p class="foot-note" style="margin-top:12px">A win means solving the puzzle (3 or more right in Flip). Stats are saved in this browser only.</p>`);
   $("modal-root").querySelectorAll("[data-sp]").forEach(btn => btn.addEventListener("click", () => { openStats(btn.dataset.sp); const f = $("modal-root").querySelector(`[data-sp="${btn.dataset.sp}"]`); if (f) f.focus(); }));
 }
 document.addEventListener("keydown", e => {
-  if ($("modal-root").innerHTML || current !== "links" || !k4.st || k4.st.done) return;
+  if ($("modal-root").innerHTML || current !== "quads" || !k4.st || k4.st.done) return;
   if (e.target.closest && e.target.closest("input, textarea")) return;
   if (e.key === "Enter" && k4.st.selected.length === 4 && !e.target.closest("button")) { e.preventDefault(); k4.submit(); }
   if (e.key === "Escape" && k4.st.selected.length && !k4.busy) { k4.st.selected = []; render(); }
 });
 
 function practiceKey(storeName) { return `sa2:${ek(SPORT)}:${storeName}:practice`; }   // saved, but never counted in stats
-const hasPractice = g => !!(D && (g === "higher-lower" ? D.hlPractice : D.practice && D.practice[GAMES[g].obj.store]));
+const hasPractice = g => !!(D && (g === "flip" ? D.hlPractice : D.practice && D.practice[GAMES[g].obj.store]));
 function puzzleKey(storeName, i, mode) {
   if (mode === "practice") return null;
   return mode === "daily" ? `sa2:${ek(SPORT)}:${storeName}:day:${day.key}` : `sa2:${ek(SPORT)}:${storeName}:arch:${i}`;
@@ -1493,8 +1498,8 @@ function reportURL(st) {
   const g = GAMES[current], ans = st.puzzle ? st.puzzle.n : st.ans ? st.ans.n : null;
   const day_ = st.mode === "practice" ? "practice" : `day ${st.idx + 1}`;
   const title = `${LGE()} ${g ? g.title : ""} ${day_}: `;
-  const extra = g && current === "links" ? k4.groups().map(x => `- ${x.label}: ${x.p.join(", ")}`).join("\n")
-    : current === "higher-lower" ? st.qs.map((q, i) => `${i + 1}. ${q.s}: ${q.a.n} (${q.a.c}) ${FMT[q.f](q.a.v)} vs ${q.b.n} (${q.b.c}) ${FMT[q.f](q.b.v)}`).join("\n")
+  const extra = g && current === "quads" ? k4.groups().map(x => `- ${x.label}: ${x.p.join(", ")}`).join("\n")
+    : current === "flip" ? st.qs.map((q, i) => `${i + 1}. ${q.s}: ${q.a.n} (${q.a.c}) ${FMT[q.f](q.a.v)} vs ${q.b.n} (${q.b.c}) ${FMT[q.f](q.b.v)}`).join("\n")
     : `Answer: ${ans}`;
   const body = `**Sport:** ${LG()}\n**Era:** ${ERAS[ERA].label}\n**Game:** ${g ? g.title : ""}\n**Puzzle:** ${day_}\n\n${extra}\n\n**What's wrong?**\n`;
   return `https://github.com/${GITHUB_REPO}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
@@ -1522,7 +1527,7 @@ function openArchive(gameId, obj) {
 function openSettings() {
   const cb = document.documentElement.classList.contains("cb");
   openSheet("Settings", `<h2>${ICON.gear} Settings</h2>
-    <label class="toggle"><div><b>Colour-blind friendly colours</b><span>Uses a high-contrast palette and adds shapes (● ▲ ■ ◆) to Links groups.</span></div>
+    <label class="toggle"><div><b>Colour-blind friendly colours</b><span>Uses a high-contrast palette and adds shapes (● ▲ ■ ◆) to Quads groups.</span></div>
       <span class="switch"><input type="checkbox" id="opt-cb" ${cb ? "checked" : ""}><i></i></span></label>
     <p class="panel-note" style="margin-top:12px">Settings are saved in this browser.</p>`);
   $("opt-cb").addEventListener("change", e => {
@@ -1545,7 +1550,7 @@ let current = "home";
 let viewSeq = 0;                                          // bumps each time a page is opened, so open-animations run once
 let loadToken = 0;
 const LOADING = {};
-function loadSport(k, era = ERA) {                       // main + Higher or Lower files fetched together, shared by clicks and prefetch
+function loadSport(k, era = ERA) {                       // main + Flip files fetched together, shared by clicks and prefetch
   if (!hasEras(k)) era = "all";
   const key = k + (era === "modern" ? "-modern" : "");
   if (CACHE[key]) return Promise.resolve(CACHE[key]);
@@ -1595,7 +1600,7 @@ async function useSport(k, token) {
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
   store.set("sa2:sport", k);
-  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journeyman, ${D.knecht.length} Links, ${D.statline.length} Stat Line and ${(D.hl || []).length} Higher or Lower puzzles.`;
+  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journey, ${D.knecht.length} Quads, ${D.statline.length} Digits and ${(D.hl || []).length} Flip puzzles.`;
 }
 function render() {
   const root = $("view");
@@ -1618,11 +1623,12 @@ function render() {
 async function route() {
   let h = location.hash.slice(1);
   let sport = store.get("sa2:sport", "nba"), game = "home";
-  if (h === "knecht-4") h = "links";
+  const OLD = { journeyman: "journey", links: "quads", "knecht-4": "quads", "stat-line": "digits", "higher-lower": "flip" };   // old names still open the right game
+  if (OLD[h]) h = OLD[h];
   if (GAMES[h]) game = h;                                  // old links like #journeyman
   else {
     const m = h.match(/^(nba|nfl|nhl|mlb|soccer)(?:-(.+))?$/);
-    if (m) { sport = m[1]; const g2 = m[2] === "knecht-4" ? "links" : m[2]; game = GAMES[g2] ? g2 : "home"; }
+    if (m) { sport = m[1]; const g2 = OLD[m[2]] || m[2]; game = GAMES[g2] ? g2 : "home"; }
   }
   if (!SPORTS[sport]) sport = "nba";
   const token = ++loadToken;
