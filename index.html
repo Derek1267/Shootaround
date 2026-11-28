@@ -442,12 +442,14 @@ header nav#nav a.crumb.next .ico { transform: rotate(180deg); }
 @media (max-width: 959px) { .topbar .wordmark { font-size: clamp(22px, calc((100vw - 226px) / 6.1), 60px) !important; } }
 @media (max-width: 380px) { .topbar .iconbtn { width: 32px; height: 32px; } .topbar .tools { gap: 3px; } .topbar .iconbtn .ico { width: 16px; height: 16px; }
   .topbar .wordmark { font-size: clamp(20px, calc((100vw - 185px) / 6.1), 40px) !important; } }
-/* phones: Quads tiles become wide rectangles, two across, so long names fit without breaking out of the tile */
+/* Quads is always a 4x4 grid. Names never break mid-word; fitTiles() shrinks a long name until it fits its tile. */
+#k-card .tile { overflow-wrap: normal; word-break: keep-all; hyphens: manual; }
+#k-card .tile .tn { display: block; max-width: 100%; }
+#k-card .tile.narrow { font-family: var(--display); font-weight: 800; letter-spacing: .01em; }
 @media (max-width: 560px) {
-  #k-card .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-  #k-card .tile { min-height: 50px; padding: 8px 10px; font-size: 13px; letter-spacing: .01em; overflow-wrap: normal; word-break: normal; hyphens: manual; }
+  #k-card .grid { gap: 6px; }
+  #k-card .tile { min-height: 60px; padding: 4px 3px; font-size: 12px; letter-spacing: 0; border-radius: 9px; }
 }
-@media (max-width: 360px) { #k-card .tile { font-size: 12px; padding: 7px 6px; } }
 .tip { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); font-size: 14px; line-height: 1.35; }
 .tip .ico { width: 18px; height: 18px; flex: none; color: var(--accent); }
 .tip span { flex: 1; }
@@ -584,6 +586,25 @@ function isPerfect(gameId, st) {
   if (gameId === "quads") return !st.mistakes && !st.hints;
   return st.guesses.length === 1;
 }
+
+/* Quads: shrink a tile's text until its longest word and all its lines fit inside the tile */
+function fitTiles() {
+  document.querySelectorAll("#k-card .tile").forEach(t => {
+    const tn = t.querySelector(".tn"); if (!tn) return;
+    t.style.fontSize = ""; t.classList.remove("narrow");
+    const cs = getComputedStyle(t), padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const base = parseFloat(cs.fontSize);
+    const tooBig = () => tn.scrollWidth > t.clientWidth - padX + 0.5 || tn.scrollHeight > t.clientHeight - padY + 0.5;
+    let size = base;
+    while (tooBig() && size > 9) { size -= 0.5; t.style.fontSize = size + "px"; }
+    if (tooBig()) {                       // a very long single word: switch to the condensed display font instead of tiny text
+      t.classList.add("narrow"); size = base + 3; t.style.fontSize = size + "px";
+      while (tooBig() && size > 8) { size -= 0.5; t.style.fontSize = size + "px"; }
+    }
+  });
+}
+addEventListener("resize", () => { clearTimeout(fitTiles.t); fitTiles.t = setTimeout(fitTiles, 80); });
+if (document.fonts) document.fonts.ready.then(fitTiles);
 
 /* ---- 1. Share as an image (Web Share where available, otherwise a download) ---- */
 function loadImg(src) { return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; }); }
@@ -1170,7 +1191,7 @@ const k4 = {
       const g = groups[i];
       return `<div class="group ${i === this.landed ? "new" : ""}" style="background:var(--t${g.tier})"><b><span class="shape">${SHAPES[g.tier]} </span>${esc(teamLabel(g.label))}</b><span>${g.p.map(esc).join(", ")}</span></div>`;
     }).join("");
-    const tiles = st.order.map((n, i) => `<button type="button" class="tile" style="--i:${i}" aria-pressed="${st.selected.includes(n)}" aria-label="${esc(n)}" data-name="${esc(n)}">${esc(n)}</button>`).join("");
+    const tiles = st.order.map((n, i) => `<button type="button" class="tile" style="--i:${i}" aria-pressed="${st.selected.includes(n)}" aria-label="${esc(n)}" data-name="${esc(n)}"><span class="tn">${esc(n)}</span></button>`).join("");
     const pips = Array.from({ length: K4_MISTAKES }, (_, i) => `<span class="pip ${i < st.mistakes ? "used" : ""}"></span>`).join("");
     root.innerHTML = `<div class="layout k4"><div class="main">
       <section class="card" id="k-card">
@@ -1191,6 +1212,7 @@ const k4 = {
         ${this.clues()}
         ${pageFooter(st)}
       </aside></div>`;
+    fitTiles();
     if (this.dealt !== viewSeq) {
       this.dealt = viewSeq;
       root.querySelectorAll("#k-card .grid, #k-card .solved").forEach(el => el.classList.add("deal"));
@@ -1582,8 +1604,7 @@ const HELP = {
     <li>You can make ${K4_MISTAKES} mistakes. "One away" means three of your four belong together.</li>
     <li>${ICON.bulb} Hints: the first shows what kind of link each group has; the next two name the easiest groups. Hints show in your shared result.</li>
     <li>Colours go from easiest to trickiest: <span class="legend" style="background:var(--t0)"></span><span class="legend" style="background:var(--t1)"></span><span class="legend" style="background:var(--t2)"></span><span class="legend" style="background:var(--t3)"></span> Every player belongs to exactly one group, and each link fits exactly four players on the board.</li>
-    <li>Keyboard: <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li>
-      <li class="kbd-tip">Keyboard: Tab to a player and press Space to pick them, Enter to submit four, Esc to deselect.</li></ul></div>`,
+    <li>Keyboard: <span class="kbd">Tab</span> to a player and <span class="kbd">Space</span> to pick, <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li></ul></div>`,
   "flip": () => `<h2>${ICON.updown} Flip</h2><div class="how"><ul>
     <li>Five questions. Each one shows a stat for one player, then asks if a second player's number is higher or lower.</li>
     <li>Questions 1 and 2 are warm-ups, 3 and 4 use deeper stats, and question 5 is about one specific season.</li>
