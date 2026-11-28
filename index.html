@@ -1753,7 +1753,8 @@ function openSettings() {
   openSheet("Settings", `<h2>${ICON.gear} Settings</h2>
     <label class="toggle"><div><b>Colour-blind friendly colours</b><span>Uses a high-contrast palette and adds shapes (● ▲ ■ ◆) to Quads groups.</span></div>
       <span class="switch"><input type="checkbox" id="opt-cb" ${cb ? "checked" : ""}><i></i></span></label>
-    <p class="panel-note" style="margin-top:12px">Settings are saved in this browser.</p>`);
+    ${reduced() ? `<p class="panel-note" style="margin-top:12px"><b>Animations are off</b> because Reduce Motion is turned on for this device (on iPhone: Settings › Accessibility › Motion).</p>` : ""}
+    <p class="panel-note" style="margin-top:12px">Settings are saved in this browser. Version ${BUILD}.</p>`);
   $("opt-cb").addEventListener("change", e => {
     document.documentElement.classList.toggle("cb", e.target.checked);
     store.set("sa2:cb", e.target.checked);
@@ -1770,6 +1771,7 @@ function openCredits() {
     <li>Shootaround is a fan-made project. It is not affiliated with or endorsed by the NBA, NFL, NHL, MLB, MLS, any soccer league or club, or any player. No team logos are used.</li>
   </ul></div>`);
 }
+const BUILD = "20261128-054413";                                       // stamped by build/bump.py; version.json holds the live one
 let current = "home", routedSport = null, homeStagger = false;
 let viewSeq = 0;                                          // bumps each time a page is opened, so open-animations run once
 let loadToken = 0;
@@ -1850,6 +1852,19 @@ async function useSport(k, token) {
   store.set("sa2:sport", k);
   $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} days of Journey, Quads, Digits and Flip puzzles.`;
 }
+/* ---- keep installed home-screen apps up to date: phones can hold an old copy of the page for a long time ---- */
+async function checkUpdate() {
+  if (!/^https?:/.test(location.protocol) || BUILD === "dev") return;
+  try {
+    const r = await fetch(`version.json?t=${Date.now()}`, { cache: "no-store" }); if (!r.ok) return;
+    const { v } = await r.json();
+    if (!v || v === BUILD || sessionStorage.getItem("sa2:upd") === v) return;   // once per new version, so a stale cache can never loop
+    sessionStorage.setItem("sa2:upd", v);
+    await fetch(location.pathname + location.search, { cache: "reload" }).catch(() => {});   // refresh the cached page first
+    location.reload();
+  } catch (e) {}
+}
+
 /* ---- app-feel motion helpers ---- */
 function buzz(p) { try { if (navigator.vibrate && !reduced()) navigator.vibrate(p); } catch (e) {} }   // Android only; iPhones ignore it
 function slideView(dir) {
@@ -1977,6 +1992,8 @@ function start() {
   $("btn-stats").addEventListener("click", openStats);
   window.addEventListener("hashchange", route);
   wireSwipe();
+  checkUpdate();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkUpdate(); });
   route().then(prefetchSports).finally(hideSplash);
   setTimeout(hideSplash, 4000);
   setInterval(tick, 1000);

@@ -105,3 +105,7 @@ Every puzzle is generated from real data rather than written by hand:
 - NHL covers skaters only (no goalies) and has no award-based groups.
 - Active players' numbers are a snapshot from the last data build and don't update during the season.
 - Title counts credit a player when they finished that season on the championship team.
+
+## Releasing
+
+Run `python3 build/bump.py` before each push. It stamps a new build number into `index.html` and `version.json`; installed home-screen apps compare the two when opened and reload themselves if they are out of date.
