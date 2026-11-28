@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Shootaround · Digits</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Name the player from their career numbers. A daily sports puzzle for NBA, NFL, NHL, MLB and soccer fans.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shootaround · Digits">
+<meta property="og:description" content="Name the player from their career numbers. A daily sports puzzle for NBA, NFL, NHL, MLB and soccer fans.">
+<meta property="og:image" content="https://derek1267.github.io/Shootaround/play/digits/og.png">
+<meta property="og:url" content="https://derek1267.github.io/Shootaround/play/digits/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#120c1f">
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<script>
+  // open the game: the link carries the era (?era=) and the sport (#nba)
+  var h = (location.hash || "").slice(1), sp = /^(nba|nfl|nhl|mlb|soccer)$/.test(h) ? h + "-" : "";
+  location.replace("../../" + location.search + "#" + sp + "digits");
+</script>
+</head><body style="background:#120c1f;color:#efeaf8;font-family:sans-serif">
+<p><a style="color:#a57cff" href="../../#digits">Play Shootaround · Digits</a></p>
+</body></html>

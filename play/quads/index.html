@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Shootaround · Quads</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Sort 16 players into four groups of four. A daily sports puzzle for NBA, NFL, NHL, MLB and soccer fans.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Shootaround · Quads">
+<meta property="og:description" content="Sort 16 players into four groups of four. A daily sports puzzle for NBA, NFL, NHL, MLB and soccer fans.">
+<meta property="og:image" content="https://derek1267.github.io/Shootaround/play/quads/og.png">
+<meta property="og:url" content="https://derek1267.github.io/Shootaround/play/quads/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#120c1f">
+<link rel="icon" type="image/svg+xml" href="../../logo.svg">
+<script>
+  // open the game: the link carries the era (?era=) and the sport (#nba)
+  var h = (location.hash || "").slice(1), sp = /^(nba|nfl|nhl|mlb|soccer)$/.test(h) ? h + "-" : "";
+  location.replace("../../" + location.search + "#" + sp + "quads");
+</script>
+</head><body style="background:#120c1f;color:#efeaf8;font-family:sans-serif">
+<p><a style="color:#a57cff" href="../../#quads">Play Shootaround · Quads</a></p>
+</body></html>

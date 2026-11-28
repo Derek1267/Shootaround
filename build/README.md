@@ -31,6 +31,8 @@ python3 -m http.server 8000
 | `nba.json`, `nfl.json`, `nhl.json`, `mlb.json`, `soccer.json` | 500 days of Journey, Quads and Digits per sport, plus the player lists for guessing |
 | `hl-nba.json`, `hl-nfl.json`, `hl-nhl.json`, `hl-mlb.json`, `hl-soccer.json` | 500 days of Flip per sport (5 questions a day) |
 | `*-modern.json` | The same four kinds of file for the Modern era |
+| `data/` | Split copies of the puzzle files that the site loads (made by `split.py`) |
+| `play/<game>/` | Small pages with each game's own link preview; shared links point here and open the game |
 | `logo.svg` | The logo, also used as the browser tab icon |
 | `og.png` | Preview image for shared links |
 | `icon-180.png` | Home-screen icon when someone adds the site to their phone |
@@ -51,6 +53,12 @@ python3 build.py --force             # NBA: Journey, Quads, Digits (~10 min)
 python3 build_sport.py nfl nhl mlb soccer --force
 python3 hl_build.py nba nfl nhl mlb soccer --force   # Flip
 python3 verify.py && python3 verify_sport.py nfl nhl mlb && python3 verify_hl.py
+```
+
+**After any build, split the files for the site.** The site loads a small core file per set plus the 50-day chunk for today, so a first visit downloads about a third as much. Run this after every build or extend:
+
+```bash
+python3 split.py
 ```
 
 **Adding more days.** `--extend` adds 135 days after the last published one for every game, using the most famous players not yet used anywhere; published days and practice rounds never change:

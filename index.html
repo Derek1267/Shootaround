@@ -27,7 +27,7 @@
   --ink: #1c1330;
   --muted: #6b6280;
   --line: #ddd6ea;
-  --accent: #6d3fd6;
+  --accent: #6d3fd6; --on-accent: #fff;
   --g-jm: #7b3fe4;
   --g-k4: #a8338f;
   --g-sl: #4a45c4;
@@ -43,14 +43,14 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #120c1f; --surface: #1d1530; --ink: #efeaf8; --muted: #a297b8; --line: #33284b;
-    --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
+    --accent: #a57cff; --on-accent: #160c2e; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
     --good: #3bb877; --near: #e0ad35; --miss: #3d3156;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #120c1f; --surface: #1d1530; --ink: #efeaf8; --muted: #a297b8; --line: #33284b;
-  --accent: #a57cff; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
+  --accent: #a57cff; --on-accent: #160c2e; --g-jm: #a57cff; --g-k4: #e070c9; --g-sl: #8f8aff; --g-hl: #d49cff;
   --good: #3bb877; --near: #e0ad35; --miss: #3d3156;
   color-scheme: dark;
 }
@@ -72,7 +72,7 @@ header { display: flex; flex-direction: column; gap: 12px; }
 #meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .era { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); flex: none; }
 .era button { border: 0; background: transparent; color: var(--muted); font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; padding: 6px 11px; border-radius: 999px; cursor: pointer; }
-.era button.on { background: var(--accent); color: #fff; }
+.era button.on { background: var(--accent); color: var(--on-accent); }
 .era-note { font: 700 12px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--line); border-radius: 999px; padding: 9px 12px; flex: none; }
 #era-top { display: none; }
 
@@ -85,7 +85,7 @@ header { display: flex; flex-direction: column; gap: 12px; }
 .iconbtn:hover { border-color: var(--accent); color: var(--accent); }
 nav { display: flex; gap: 6px; }
 nav a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font: 600 13px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; padding: 10px 8px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); background: var(--surface); }
-nav a[aria-current="page"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+nav a[aria-current="page"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 nav a { position: relative; }
 nav a .done-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
 @media (max-width: 560px) {
@@ -95,7 +95,7 @@ nav a .done-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 
   nav { gap: 2px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
   nav a { flex-direction: column; gap: 4px; border: 0; background: transparent; font-size: 10px; padding: 8px 2px; border-radius: 9px; }
   nav a .ico { width: 21px; height: 21px; }
-  nav a[aria-current="page"] { background: var(--accent); color: #fff; }
+  nav a[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
   #sportbar .sports { padding: 3px; }
   #sportbar .sport { padding: 6px 4px; font-size: 13px; }
   #sportbar .sports { gap: 2px; }
@@ -113,10 +113,10 @@ nav a .done-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 
 .badge.l0 { color: var(--good); border-color: var(--good); }
 .badge.l1 { color: var(--near); border-color: var(--near); }
 .badge.l2 { color: var(--accent); border-color: var(--accent); }
-.badge.pr { background: var(--accent); color: #fff; border-color: var(--accent); }
+.badge.pr { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 button { font-family: var(--body); }
 button.primary, button.ghost { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
-button.primary { font: 700 15px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 12px 18px; cursor: pointer; }
+button.primary { font: 700 15px/1 var(--body); letter-spacing: .04em; text-transform: uppercase; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 10px; padding: 12px 18px; cursor: pointer; }
 button.primary:disabled { opacity: .4; cursor: not-allowed; }
 button.ghost { font: 600 14px/1 var(--body); background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; cursor: pointer; }
 button.ghost:disabled { opacity: .45; cursor: not-allowed; }
@@ -200,7 +200,7 @@ button:focus-visible, a:focus-visible, .tile:focus-visible { outline: 3px solid 
 .hero-line { font-size: 18px; margin: 0; max-width: 34ch; text-wrap: balance; }
 .sports { display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
 .sport { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font: 800 15px/1 var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 8px 14px; border-radius: 9px; border: 0; color: var(--muted); text-decoration: none; }
-.sport.on { background: var(--accent); color: #fff; }
+.sport.on { background: var(--accent); color: var(--on-accent); }
 .sport:not(.on):hover { color: var(--ink); }
 .sport small { text-transform: none; font-weight: 500; margin-left: 3px; letter-spacing: 0; }
 .tickets { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -443,6 +443,23 @@ header nav#nav a.crumb.next .ico { transform: rotate(180deg); }
   #k-card .tile { min-height: 50px; padding: 8px 10px; font-size: 13px; letter-spacing: .01em; overflow-wrap: normal; word-break: normal; hyphens: manual; }
 }
 @media (max-width: 360px) { #k-card .tile { font-size: 12px; padding: 7px 6px; } }
+.tip { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 14%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); font-size: 14px; line-height: 1.35; }
+.tip .ico { width: 18px; height: 18px; flex: none; color: var(--accent); }
+.tip span { flex: 1; }
+.tip-x { flex: none; border: 0; border-radius: 8px; padding: 7px 10px; background: var(--accent); color: var(--on-accent); font: 700 13px/1 var(--body); cursor: pointer; }
+.allfour { width: fit-content; max-width: 100%; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 16px; padding: 9px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 14px; }
+.allfour b { color: var(--ink); }
+.allfour.on { border-color: var(--good); }
+.allfour.on b, .allfour.on .ico { color: var(--good); }
+.allfour .ico { width: 16px; height: 16px; }
+.allfour-stat { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+.allfour-stat b { color: var(--ink); }
+#cmp-in { width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 14px/1.4 var(--body); resize: vertical; }
+.cmp { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+.cmp th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.cmp td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp td span { display: block; font-size: 12px; color: var(--muted); }
+.kbd-tip { color: var(--muted); }
 </style>
 </head>
 <body>
@@ -548,6 +565,105 @@ function statsHTML(g) {
   return `<div class="stats">${[["Played", s.played], ["Win %", pct], ["Streak", s.streak], ["Best", s.best]]
     .map(([l, v]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("")}</div>`;
 }
+const GAME_VAR = { journey: "--g-jm", quads: "--g-k4", digits: "--g-sl", flip: "--g-hl" };
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function scoreOf(gameId, s) {                             // short score from a saved game state
+  if (!s || !s.done) return null;
+  if (gameId === "flip") return `${s.score}/${HL_N}`;
+  if (gameId === "quads") return s.won ? (s.mistakes ? `Solved · ${s.mistakes} miss${s.mistakes === 1 ? "" : "es"}` : "Perfect") : "Not solved";
+  return s.won ? `${s.guesses.length}/6` : "X/6";
+}
+function isPerfect(gameId, st) {
+  if (!st.done || !st.won) return false;
+  if (gameId === "flip") return hl.score() === HL_N;
+  if (gameId === "quads") return !st.mistakes && !st.hints;
+  return st.guesses.length === 1;
+}
+
+/* ---- 1. Share as an image (Web Share where available, otherwise a download) ---- */
+function loadImg(src) { return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; }); }
+async function shareImage(btn, gameId, obj) {
+  const st = obj.st, W = 1200, H = 630, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d"), col = cssVar(GAME_VAR[gameId]) || "#a57cff";
+  try { if (document.fonts) await document.fonts.ready; } catch (e) {}
+  x.fillStyle = "#120d1f"; x.fillRect(0, 0, W, H);
+  x.fillStyle = col; x.fillRect(0, 0, W, 14);
+  try { x.drawImage(await loadImg("logo.svg"), 70, 62, 92, 92); } catch (e) {}
+  x.textBaseline = "middle";
+  x.fillStyle = "#f3eefe"; x.font = '800 62px "Big Shoulders Display", Impact, sans-serif'; x.fillText("SHOOTAROUND", 186, 110);
+  x.fillStyle = col; x.font = '800 116px "Big Shoulders Display", Impact, sans-serif'; x.fillText(GAMES[gameId].title.toUpperCase(), 66, 262);
+  x.fillStyle = "#b9b0d3"; x.font = '600 34px Barlow, Arial, sans-serif';
+  x.fillText(`${LGE()} · ${st.mode === "practice" ? "Practice" : "Day " + (st.idx + 1)}`, 72, 350);
+  x.fillStyle = "#f3eefe"; x.font = '800 104px "Big Shoulders Display", Impact, sans-serif'; x.fillText(scoreOf(gameId, st) || "", 66, 462);
+  const lines = obj.share().split("\n").slice(1).filter(Boolean).slice(0, 7);
+  x.textAlign = "right"; x.font = '42px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+  lines.forEach((l, i) => x.fillText((l.match(/🟨|🟩|🟦|🟪|⬛|🟥|⬜|🟧/gu) || []).join(""), W - 70, 200 + i * 54));
+  x.textAlign = "left"; x.fillStyle = "#b9b0d3"; x.font = '600 28px Barlow, Arial, sans-serif';
+  x.fillText(SITE_URL.replace(/^https?:\/\//, "").replace(/\/$/, ""), 72, 574);
+  const blob = await new Promise(r => c.toBlob(r, "image/png"));
+  const file = new File([blob], `shootaround-${SPORT}-${gameId}${st.mode === "daily" ? "-day" + (st.idx + 1) : ""}.png`, { type: "image/png" });
+  const text = `${obj.share()}\n${shareURL()}`;
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text }); return; } catch (e) { if (e && e.name === "AbortError") return; }
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  btn.innerHTML = `${ICON.check}<span>Image saved</span>`; setTimeout(() => { btn.innerHTML = `${ICON.image}<span>Share image</span>`; }, 1800);
+}
+
+/* ---- 3. All four games done today: badge and streak (per sport and era) ---- */
+const allFourKey = () => `sa2:${ek(SPORT)}:allfour`;
+function allFour() {
+  const s = store.get(allFourKey(), { streak: 0, best: 0, last: null, days: 0 });
+  const doneToday = GAME_ORDER.every(g => ["won", "lost"].includes(gameStatus(g).kind));
+  if (doneToday && s.last !== day.index) {
+    s.streak = s.last === day.index - 1 ? s.streak + 1 : 1; s.best = Math.max(s.best, s.streak); s.last = day.index; s.days = (s.days || 0) + 1;
+    store.set(allFourKey(), s);
+  }
+  const current = s.last === day.index || s.last === day.index - 1 ? s.streak : 0;
+  return { doneToday, streak: current, best: s.best, count: GAME_ORDER.filter(g => ["won", "lost"].includes(gameStatus(g).kind)).length };
+}
+
+/* ---- 4. Compare with a friend: paste their shared result, no accounts ---- */
+const GAME_BY_TITLE = { Journey: "journey", Quads: "quads", Digits: "digits", Flip: "flip", Journeyman: "journey", Links: "quads", "Stat Line": "digits", "Higher or Lower": "flip" };
+function parseShared(text) {
+  return String(text).split(/(?=Shootaround )/).map(b => {
+    const m = b.match(/^Shootaround (.+?) · (Journey(?:man)?|Quads|Links|Digits|Stat Line|Flip|Higher or Lower) (?:#(\d+)|\(practice\))/);
+    if (!m) return null;
+    const game = GAME_BY_TITLE[m[2]]; let score = "?";
+    if (game === "flip") { const t = b.match(/\b(\d)\/5\b/); if (t) score = `${t[1]}/5`; }
+    else if (game === "quads") {
+      const rows = b.split("\n").map(l => (l.match(/🟨|🟩|🟦|🟪|⬛|🟥/gu) || [])).filter(r => r.length === 4);
+      const ok = rows.filter(r => r.every(t => t === r[0])).length, miss = rows.length - ok;
+      score = ok === 4 ? (miss ? `Solved · ${miss} miss${miss === 1 ? "" : "es"}` : "Perfect") : "Not solved";
+    } else { const t = b.match(/\b([1-6X])\/6\b/); if (t) score = `${t[1]}/6`; }
+    return { label: m[1].trim(), game, day: m[3] ? +m[3] : null, score };
+  }).filter(Boolean);
+}
+function utcKey(i) { const d = new Date(EPOCH + i * 86400000); return d.toISOString().slice(0, 10); }
+function myScoreFor(gameId, dayNum) {
+  const i = dayNum - 1, store_ = GAMES[gameId].obj.store;
+  const s = store.get(`sa2:${ek(SPORT)}:${store_}:day:${i === day.index ? day.key : utcKey(i)}`, null) || store.get(`sa2:${ek(SPORT)}:${store_}:arch:${i}`, null);
+  return scoreOf(gameId, s);
+}
+function openCompare() {
+  openSheet("Compare with a friend", `<h2>${ICON.users} Compare with a friend</h2>
+    <p class="panel-note" style="margin-bottom:10px">Paste the result a friend shared with you (one game or several). Nothing is sent anywhere.</p>
+    <textarea id="cmp-in" rows="6" placeholder="Shootaround NBA Modern · Quads #6&#10;🟨🟨🟨🟨&#10;…" aria-label="Your friend's shared result"></textarea>
+    <div id="cmp-out" aria-live="polite"></div>`);
+  const run = () => {
+    const got = parseShared($("cmp-in").value);
+    if (!got.length) { $("cmp-out").innerHTML = $("cmp-in").value.trim() ? `<p class="panel-note">That doesn't look like a Shootaround result.</p>` : ""; return; }
+    $("cmp-out").innerHTML = `<table class="cmp"><thead><tr><th>Game</th><th>You</th><th>Friend</th></tr></thead><tbody>${got.map(r => {
+      const sameSet = r.label === LGE();
+      const mine = r.day == null ? "Practice" : !sameSet ? `Switch to ${esc(r.label)}` : (myScoreFor(r.game, r.day) || "Not played");
+      return `<tr><td><b>${GAMES[r.game].title}</b><span>${esc(r.label)}${r.day ? " · Day " + r.day : " · Practice"}</span></td><td>${mine}</td><td>${esc(r.score)}</td></tr>`;
+    }).join("")}</tbody></table>`;
+  };
+  $("cmp-in").addEventListener("input", run);
+  $("cmp-in").focus();
+}
+
 function copyShare(btn, text) {
   text = `${text}\n${shareURL()}`;
   const ok = () => { btn.innerHTML = `${ICON.check}<span>Copied!</span>`; setTimeout(() => btn.innerHTML = `${ICON.copy}<span>Copy result</span>`, 1600); };
@@ -563,6 +679,8 @@ function resultBody(gameId, obj) {
     <div class="share-preview">${esc(obj.share())}\n${esc(shareURL())}</div>
     <div class="row-actions">
       <button class="primary" type="button" data-act="copy">${ICON.copy}<span>Copy result</span></button>
+      <button class="ghost" type="button" data-act="share-img">${ICON.image}<span>Share image</span></button>
+      <button class="ghost" type="button" data-act="compare">${ICON.users}<span>Compare</span></button>
       ${daily ? nextGameButton(gameId) : ""}
       ${st.mode === "practice" ? `<button class="ghost" type="button" data-act="practice-again">${ICON.play}Try the practice again</button>`
         : daily && hasPractice(gameId) ? `<button class="ghost" type="button" data-act="practice">${ICON.play}Practice round</button>` : ""}
@@ -576,6 +694,8 @@ function nextGameButton(gameId) {
 }
 function wireResult(root, gameId, obj) {
   root.querySelectorAll('[data-act="copy"]').forEach(b => b.addEventListener("click", () => copyShare(b, obj.share())));
+  root.querySelectorAll('[data-act="share-img"]').forEach(b => b.addEventListener("click", () => shareImage(b, gameId, obj).catch(() => { b.textContent = "Couldn't make the image"; })));
+  root.querySelectorAll('[data-act="compare"]').forEach(b => b.addEventListener("click", () => openCompare()));
   root.querySelectorAll('[data-act="goto"]').forEach(b => b.addEventListener("click", () => { closeModal(); location.hash = b.dataset.to; }));
   // the practice round is one puzzle you can redo: a finished one starts over, an unfinished one carries on
   const startPractice = again => { closeModal(); obj.loadPractice(); if (again || obj.st.done) { store.del(obj.st.key); obj.loadPractice(); } viewSeq++; render(); window.scrollTo(0, 0); };
@@ -599,7 +719,8 @@ function openModal(gameId, obj, celebrate) {
   document.addEventListener("keydown", escClose);
   $("m-close").focus();
   tick();
-  if (celebrate && r.won) confetti();
+  allFour();
+  if (celebrate && r.won) confetti(isPerfect(gameId, obj.st));
 }
 function escClose(e) { if (e.key === "Escape") closeModal(); }
 function closeModal() {
@@ -607,15 +728,17 @@ function closeModal() {
   document.removeEventListener("keydown", escClose);
   if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
 }
-function confetti() {
+function confetti(perfect) {
   if (reduced()) return;
+  if (perfect) setTimeout(() => confetti(false), 450);      // a perfect game gets a second burst and a gold sparkle
   const c = document.createElement("canvas"); c.className = "confetti";
   c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio;
   document.body.appendChild(c);
   const x = c.getContext && c.getContext("2d");
   if (!x) { c.remove(); return; }
   const cols = ["#7b3fe4", "#e070c9", "#f2c84b", "#8ccb6e", "#84aef2", "#ffffff"];
-  const bits = Array.from({ length: 140 }, () => ({ x: c.width / 2 + (Math.random() - .5) * c.width * .3, y: c.height * .35,
+  if (perfect) cols.push("#f2c84b", "#f2c84b", "#ffe28a");
+  const bits = Array.from({ length: perfect ? 220 : 140 }, () => ({ x: c.width / 2 + (Math.random() - .5) * c.width * .3, y: c.height * .35,
     vx: (Math.random() - .5) * 18, vy: -Math.random() * 18 - 6, r: Math.random() * 6 + 4, a: Math.random() * 6, col: cols[Math.floor(Math.random() * cols.length)] }));
   let f = 0;
   (function step() {
@@ -671,6 +794,8 @@ const ICON = {
   x: SVG('<path d="M6 6l12 12M18 6L6 18"/>'),
   check: SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   copy: SVG('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>'),
+  image: SVG('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/>'),
+  users: SVG('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/>'),
   play: SVG('<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/>'),
   help: SVG('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14"/><path d="M12 17.5h.01"/>'),
   stats: SVG('<path d="M4 20V14M9 20V8M14 20v-9M19 20V4"/>'),
@@ -736,9 +861,15 @@ function hintsHTML(defs, values, shown) {
   }).join("")}</div>`;
 }
 function cluePanel(defs, values, shown) {
+  const tip = store.get("sa2:tip:clues", false) ? "" :
+    `<div class="tip" id="clue-tip" role="note">${ICON.bulb}<span>The first clue is free. Each miss opens another one, so a wrong guess still helps.</span><button type="button" class="tip-x" data-act="tip-ok">Got it</button></div>`;
   return `<section class="card" aria-label="Clues"><div class="panel-head">${ICON.bulb}<b>Clues</b><span class="muted">${shown} of ${defs.length} open</span></div>
-    ${hintsHTML(defs, values, shown)}</section>`;
+    ${tip}${hintsHTML(defs, values, shown)}</section>`;
 }
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest('[data-act="tip-ok"]');
+  if (b) { store.set("sa2:tip:clues", true); const t = $("clue-tip"); if (t) t.remove(); }
+});
 function pageFooter(st) {
   return `<div class="row-actions">
     <button class="ghost" type="button" data-act="archive">${ICON.calendar}Archive</button>
@@ -1034,15 +1165,15 @@ const k4 = {
       const g = groups[i];
       return `<div class="group ${i === this.landed ? "new" : ""}" style="background:var(--t${g.tier})"><b><span class="shape">${SHAPES[g.tier]} </span>${esc(teamLabel(g.label))}</b><span>${g.p.map(esc).join(", ")}</span></div>`;
     }).join("");
-    const tiles = st.order.map((n, i) => `<button type="button" class="tile" style="--i:${i}" aria-pressed="${st.selected.includes(n)}" data-name="${esc(n)}">${esc(n)}</button>`).join("");
+    const tiles = st.order.map((n, i) => `<button type="button" class="tile" style="--i:${i}" aria-pressed="${st.selected.includes(n)}" aria-label="${esc(n)}" data-name="${esc(n)}">${esc(n)}</button>`).join("");
     const pips = Array.from({ length: K4_MISTAKES }, (_, i) => `<span class="pip ${i < st.mistakes ? "used" : ""}"></span>`).join("");
     root.innerHTML = `<div class="layout k4"><div class="main">
       <section class="card" id="k-card">
         <div class="title-row"><h2 class="game-title" style="color:var(--g-k4)">Quads</h2>${badge(puz.lvl, st.mode === "practice")}</div>
         <p class="prompt">Find <b>four groups of four</b> players who share something.</p>
         <div class="solved">${solved}</div>
-        ${st.done ? "" : `<div class="grid">${tiles}</div>
-          <div class="mistakes">Mistakes left <span class="pips" aria-label="${K4_MISTAKES - st.mistakes} mistakes left">${pips}</span></div>
+        ${st.done ? "" : `<div class="grid" role="group" aria-label="Players: pick four that share a link">${tiles}</div>
+          <div class="mistakes">Mistakes left <span class="pips" role="img" aria-label="${K4_MISTAKES - st.mistakes} mistakes left">${pips}</span></div>
           <div class="row-actions">
             <button class="ghost" type="button" id="k-shuffle" aria-label="Shuffle">${ICON.shuffle}<span class="hide-sm">Shuffle</span></button>
             <button class="ghost" type="button" id="k-clear" aria-label="Deselect all" ${st.selected.length ? "" : "disabled"}>${ICON.x}<span class="hide-sm">Deselect</span></button>
@@ -1323,7 +1454,7 @@ const hl = {
     if (!this.st || !this.st.qs) this.loadDaily();
     const st = this.st, showIdx = Math.min(st.view, HL_N - 1);
     const Q = st.qs[showIdx], answered = st.picks.length > showIdx, ok = answered && this.right(showIdx);
-    const pips = st.qs.map((_, k) => `<span class="hl-pip ${k < st.picks.length ? (this.right(k) ? "ok" : "bad") : k === showIdx ? "now" : ""}" aria-label="Question ${k + 1}${k < st.picks.length ? (this.right(k) ? ", right" : ", wrong") : ""}"></span>`).join("");
+    const pips = st.qs.map((_, k) => `<span class="hl-pip ${k < st.picks.length ? (this.right(k) ? "ok" : "bad") : k === showIdx ? "now" : ""}" role="img" aria-label="Question ${k + 1}${k < st.picks.length ? (this.right(k) ? ", right" : ", wrong") : ""}"></span>`).join("");
     const level = showIdx < 2 ? "Warm-up" : showIdx < 4 ? "Deep cut" : "Season special";
     const log = st.picks.map((p, k) => {
       const x = st.qs[k];
@@ -1346,8 +1477,8 @@ const hl = {
                        : `<div class="row-actions"><button class="primary hl-next" type="button" id="hl-next" style="flex:1">Next question ${ICON.play}</button></div>`}`
           : `<p class="hl-ask">Is <b>${esc(Q.b.n)}</b>'s number higher or lower?</p>
              <div class="hl-buttons">
-               <button class="primary hl-btn" type="button" data-pick="higher">${ICON.up}Higher</button>
-               <button class="primary hl-btn" type="button" data-pick="lower">${ICON.down}Lower</button>
+               <button class="primary hl-btn" type="button" data-pick="higher" aria-label="Higher: ${esc(Q.b.n)}'s number is higher (shortcut: up arrow or H)">${ICON.up}Higher</button>
+               <button class="primary hl-btn" type="button" data-pick="lower" aria-label="Lower: ${esc(Q.b.n)}'s number is lower (shortcut: down arrow or L)">${ICON.down}Lower</button>
              </div>`}
       </section></div>
       <aside class="side">
@@ -1413,6 +1544,7 @@ function renderHome(root) {
   }).join(" · ");
   root.innerHTML = `
     <p class="hero-line">Four quick ${SPORT === "soccer" ? "soccer" : LG()} games. New puzzles every day at midnight.</p>
+    ${(() => { const a = allFour(); return `<div class="allfour ${a.doneToday ? "on" : ""}" role="status">${a.doneToday ? ICON.check + "<b>All four done today</b>" : `<b>${a.count} of 4</b> done today`}${a.streak ? `<span>All-four streak: ${a.streak} day${a.streak === 1 ? "" : "s"}${a.best > a.streak ? ` · best ${a.best}` : ""}</span>` : a.best ? `<span>Best all-four streak: ${a.best}</span>` : `<span>Finish all four for an all-four streak</span>`}</div>`; })()}
     <div class="tickets">${tickets}</div>
     <p class="foot-note">${done} of ${GAME_ORDER.length} ${LG()} games finished today. Other sports: ${others}. <span class="countdown"></span></p>`;
 }
@@ -1438,29 +1570,34 @@ const HELP = {
     <li>The route shows every ${LG()} team the player played for, in order. You get ${JM_MAX} guesses.</li>
     <li>Start typing a name and pick from the list. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li><span class="legend" style="background:var(--near)"></span>Your guess shared a team with the answer. <span class="legend" style="background:var(--miss);margin-left:8px"></span>No shared teams.</li>
-    <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
+    <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li>
+      <li class="kbd-tip">Keyboard: type a name, use ↑ ↓ to pick from the list and Enter to guess.</li></ul></div>`,
   "quads": () => `<h2>${ICON.grid} Quads</h2><div class="how"><ul>
     <li>Find four groups of four players who share something. Tap four, then Submit.</li>
     <li>You can make ${K4_MISTAKES} mistakes. "One away" means three of your four belong together.</li>
     <li>${ICON.bulb} Hints: the first shows what kind of link each group has; the next two name the easiest groups. Hints show in your shared result.</li>
     <li>Colours go from easiest to trickiest: <span class="legend" style="background:var(--t0)"></span><span class="legend" style="background:var(--t1)"></span><span class="legend" style="background:var(--t2)"></span><span class="legend" style="background:var(--t3)"></span> Every player belongs to exactly one group, and each link fits exactly four players on the board.</li>
-    <li>Keyboard: <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li></ul></div>`,
+    <li>Keyboard: <span class="kbd">Enter</span> submits, <span class="kbd">Esc</span> deselects.</li>
+      <li class="kbd-tip">Keyboard: Tab to a player and press Space to pick them, Enter to submit four, Esc to deselect.</li></ul></div>`,
   "flip": () => `<h2>${ICON.updown} Flip</h2><div class="how"><ul>
     <li>Five questions. Each one shows a stat for one player, then asks if a second player's number is higher or lower.</li>
     <li>Questions 1 and 2 are warm-ups, 3 and 4 use deeper stats, and question 5 is about one specific season.</li>
     <li>Get 3 or more right to keep your streak going.</li>
-    <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li></ul></div>`,
+    <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li>
+      <li class="kbd-tip">Keyboard: ↑ or H for higher, ↓ or L for lower, Enter for the next question.</li></ul></div>`,
   "digits": () => `<h2>${ICON.bars} Digits</h2><div class="how"><ul>
     <li>Name the player from their career numbers. You get ${SL_MAX} guesses. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li>Each guess shows that player's numbers next to the answer's: an arrow says if the answer is higher ↑ or lower ↓.</li>
     <li><span class="legend" style="background:var(--good)"></span>Exact. <span class="legend" style="background:var(--near);margin-left:8px"></span>Close.</li>
-    <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li></ul></div>`,
+    <li>${ICON.skip} Skip uses up a guess and unlocks the next clue.</li>
+      <li class="kbd-tip">Keyboard: type a name, use ↑ ↓ to pick from the list and Enter to guess.</li></ul></div>`,
 };
 function openHelp() {
   const g = GAMES[current];
   const body = g ? HELP[current]() : `<h2>How it works</h2><div class="how"><ul>
       <li>Every day there are four new puzzles for each sport: ${ICON.route} Journey, ${ICON.grid} Quads, ${ICON.bars} Digits and ${ICON.updown} Flip.</li>
       <li>Switch sports with the tabs at the top. Each sport and game keeps its own streak.</li>
+      <li>After a game, copy your result or share it as an image, and paste a friend's result into <b>Compare</b> to see how you stack up. Finish all four games in a day to build an all-four streak.</li>
       <li><b>Modern</b> or <b>All-time</b>: Modern uses players from the 2010s and 2020s; All-time goes back to 1980. Each has its own daily puzzles and streaks.</li>
       <li>Each game has one practice round for warming up: a medium puzzle, separate from the daily ones. You can redo it as often as you like, and it doesn't touch your stats.</li>
       <li>New puzzles arrive at midnight, your time.</li></ul></div>`;
@@ -1477,6 +1614,8 @@ function openStats(sel) {
   openSheet("Your stats", `<h2>${ICON.stats} Your stats <span class="muted" style="font-size:.6em">${ERAS[ERA].label}</span></h2>
     <div class="sports stat-tabs" role="group" aria-label="Sport">${tabs}</div>
     <table class="stat-table"><thead><tr><th>Game</th><th>Played</th><th>Win</th><th>Streak</th><th>Best</th></tr></thead><tbody>${rows}</tbody></table>
+    ${(() => { const a = store.get(`sa2:${ek(sel)}:allfour`, { streak: 0, best: 0, days: 0, last: null }); const cur = a.last === day.index || a.last === day.index - 1 ? a.streak : 0;
+       return `<p class="allfour-stat"><b>All four in a day:</b> ${a.days || 0} day${a.days === 1 ? "" : "s"} · streak ${cur} · best ${a.best}</p>`; })()}
     <p class="foot-note" style="margin-top:12px">A win means solving the puzzle (3 or more right in Flip). Stats are saved in this browser only.</p>`);
   $("modal-root").querySelectorAll("[data-sp]").forEach(btn => btn.addEventListener("click", () => { openStats(btn.dataset.sp); const f = $("modal-root").querySelector(`[data-sp="${btn.dataset.sp}"]`); if (f) f.focus(); }));
 }
@@ -1493,7 +1632,9 @@ function puzzleKey(storeName, i, mode) {
   if (mode === "practice") return null;
   return mode === "daily" ? `sa2:${ek(SPORT)}:${storeName}:day:${day.key}` : `sa2:${ek(SPORT)}:${storeName}:arch:${i}`;
 }
-function shareURL() { return `${SITE_URL}?era=${ERA}#${SPORT}-${current}`; }
+function shareURL() {                                     // per-game pages carry their own link preview, then open the game
+  return GAMES[current] ? `${SITE_URL}play/${current}/?era=${ERA}#${SPORT}` : `${SITE_URL}?era=${ERA}#${SPORT}`;
+}
 function reportURL(st) {
   const g = GAMES[current], ans = st.puzzle ? st.puzzle.n : st.ans ? st.ans.n : null;
   const day_ = st.mode === "practice" ? "practice" : `day ${st.idx + 1}`;
@@ -1520,8 +1661,10 @@ function openArchive(gameId, obj) {
   $("modal-root").querySelectorAll("[data-i]").forEach(b => b.addEventListener("click", () => {
     const i = +b.dataset.i;
     closeModal();
-    if (i === day.index) obj.loadDaily(); else obj.loadArchive(i);
-    viewSeq++; render(); window.scrollTo(0, 0);
+    ensureDay(D, i).then(() => {
+      if (i === day.index) obj.loadDaily(); else obj.loadArchive(i);
+      viewSeq++; render(); window.scrollTo(0, 0);
+    }).catch(() => { $("msg") && ($("msg").textContent = "Couldn't load that day. Check your connection and try again."); });
   }));
 }
 function openSettings() {
@@ -1550,20 +1693,44 @@ let current = "home";
 let viewSeq = 0;                                          // bumps each time a page is opened, so open-animations run once
 let loadToken = 0;
 const LOADING = {};
-function loadSport(k, era = ERA) {                       // main + Flip files fetched together, shared by clicks and prefetch
+// Puzzles come as a small core file (players, practice rounds) plus 50-day chunks, so a first visit only downloads
+// today's chunk; other days load when the archive asks for them. Falls back to the full files if the split ones are missing.
+const DATA_DIR = "data/";
+function chunkOf(d, i) { const n = d.n, idx = ((i % n) + n) % n; return Math.floor(idx / d.chunk); }
+function addChunk(d, c) {
+  ["journeyman", "statline", "knecht"].forEach(k => c[k].forEach((v, j) => { d[k][c.start + j] = v; }));
+  c.hl.forEach((v, j) => { d.hl[c.start + j] = v; });
+  d._chunks.add(c.start / d.chunk);
+}
+function ensureDay(d, i) {                                // make sure day i of this set is downloaded
+  if (!d._split) return Promise.resolve(d);
+  const k = chunkOf(d, i);
+  if (d._chunks.has(k)) return Promise.resolve(d);
+  d._loading[k] = d._loading[k] || fetch(`${DATA_DIR}${d._set}.d${k}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(c => { addChunk(d, c); return d; }).finally(() => { delete d._loading[k]; });
+  return d._loading[k];
+}
+function loadSport(k, era = ERA) {
   if (!hasEras(k)) era = "all";
   const key = k + (era === "modern" ? "-modern" : "");
-  if (CACHE[key]) return Promise.resolve(CACHE[key]);
+  if (CACHE[key]) return ensureDay(CACHE[key], day.index).then(() => CACHE[key]);
   if (!LOADING[key]) {
-    const sfx = era === "modern" ? "-modern" : "";
+    const finish = d => { d._players = new Map(); d.players.forEach(p => { if (!d._players.has(p.n)) d._players.set(p.n, p); }); d._era = era; return d; };
+    const guessChunk = Math.floor(Math.max(0, day.index) / 50);        // fetched alongside the core; right until the schedule wraps
     LOADING[key] = Promise.all([
-      fetch(`${k}${sfx}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      fetch(`hl-${k}${sfx}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
-    ]).then(([d, h]) => {
-      d._players = new Map(); d.players.forEach(p => { if (!d._players.has(p.n)) d._players.set(p.n, p); });
-      d.hl = h ? h.days : []; d.hlPractice = h && h.practice; d._era = era;
-      return CACHE[key] = d;
-    }).finally(() => { delete LOADING[key]; });
+      fetch(`${DATA_DIR}${key}.core.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(`${DATA_DIR}${key}.d${guessChunk}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(async ([d, c]) => {
+      d._split = true; d._set = key; d._chunks = new Set(); d._loading = {};
+      d.journeyman = new Array(d.n); d.statline = new Array(d.n); d.knecht = new Array(d.n); d.hl = new Array(d.n);
+      if (c && c.start === chunkOf(d, day.index) * d.chunk) addChunk(d, c);
+      await ensureDay(d, day.index);
+      return CACHE[key] = finish(d);
+    }).catch(() => Promise.all([                          // older copy without the split files: whole files
+      fetch(`${key}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(`hl-${key}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+    ]).then(([d, h]) => { d.hl = h ? h.days : []; d.hlPractice = h && h.practice; return CACHE[key] = finish(d); }))
+      .finally(() => { delete LOADING[key]; });
   }
   return LOADING[key];
 }
@@ -1600,7 +1767,7 @@ async function useSport(k, token) {
   const [y, mo, da] = D.epoch.split("-").map(Number); EPOCH = Date.UTC(y, mo - 1, da); day = today();
   [jm, k4, sl, hl].forEach(o => { o.st = null; });
   store.set("sa2:sport", k);
-  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} Journey, ${D.knecht.length} Quads, ${D.statline.length} Digits and ${(D.hl || []).length} Flip puzzles.`;
+  $("foot").textContent = `${SPORTS[k].label} stats from ${SPORTS[k].src}, current to the ${D.built.slice(0, 4)} data update. ${!hasEras(k) ? "League numbers start in 2012–13." : ERA === "modern" ? "Modern era: players from the 2010s and 2020s." : "All-time: players since 1980."} ${D.journeyman.length} days of Journey, Quads, Digits and Flip puzzles.`;
 }
 function render() {
   const root = $("view");
@@ -1654,8 +1821,10 @@ function tick() {
   document.querySelectorAll(".countdown").forEach(el => el.textContent = `Next puzzles in ${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`);
   if (D && today().key !== day.key) {
     day = today();
-    [jm, k4, sl, hl].forEach(o => { if (!o.st || o.st.mode === "daily") o.loadDaily(); });
-    render();
+    ensureDay(D, day.index).then(() => {                  // a new day can start a new 50-day chunk
+      [jm, k4, sl, hl].forEach(o => { if (!o.st || o.st.mode === "daily") o.loadDaily(); });
+      render();
+    });
   }
 }
 
