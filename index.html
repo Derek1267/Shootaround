@@ -594,7 +594,7 @@ async function shareImage(btn, gameId, obj) {
   x.fillStyle = col; x.font = '800 116px "Big Shoulders Display", Impact, sans-serif'; x.fillText(GAMES[gameId].title.toUpperCase(), 66, 262);
   x.fillStyle = "#b9b0d3"; x.font = '600 34px Barlow, Arial, sans-serif';
   x.fillText(`${LGE()} · ${st.mode === "practice" ? "Practice" : "Day " + (st.idx + 1)}`, 72, 350);
-  x.fillStyle = "#f3eefe"; x.font = '800 104px "Big Shoulders Display", Impact, sans-serif'; x.fillText(scoreOf(gameId, st) || "", 66, 462);
+  x.fillStyle = "#f3eefe"; x.font = '800 104px "Big Shoulders Display", Impact, sans-serif'; x.fillText(scoreOf(gameId, gameId === "flip" ? { ...st, score: obj.score() } : st) || "", 66, 462);
   const lines = obj.share().split("\n").slice(1).filter(Boolean).slice(0, 7);
   x.textAlign = "right"; x.font = '42px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
   lines.forEach((l, i) => x.fillText((l.match(/🟨|🟩|🟦|🟪|⬛|🟥|⬜|🟧/gu) || []).join(""), W - 70, 200 + i * 54));
@@ -1583,8 +1583,7 @@ const HELP = {
     <li>Five questions. Each one shows a stat for one player, then asks if a second player's number is higher or lower.</li>
     <li>Questions 1 and 2 are warm-ups, 3 and 4 use deeper stats, and question 5 is about one specific season.</li>
     <li>Get 3 or more right to keep your streak going.</li>
-    <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li>
-      <li class="kbd-tip">Keyboard: ↑ or H for higher, ↓ or L for lower, Enter for the next question.</li></ul></div>`,
+    <li>Keyboard: <span class="kbd">↑</span> or <span class="kbd">H</span> for higher, <span class="kbd">↓</span> or <span class="kbd">L</span> for lower, <span class="kbd">Enter</span> for the next question.</li></ul></div>`,
   "digits": () => `<h2>${ICON.bars} Digits</h2><div class="how"><ul>
     <li>Name the player from their career numbers. You get ${SL_MAX} guesses. The first clue is shown from the start, and each miss unlocks another, up to six.</li>
     <li>Each guess shows that player's numbers next to the answer's: an arrow says if the answer is higher ↑ or lower ↓.</li>
